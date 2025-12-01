@@ -119,7 +119,24 @@ function Tasks() {
   };
 
   const toggleComplete = async (task) => {
-    const newStatus = task.estado === 'completada' ? 'pendiente' : 'completada';
+    // Status flow: pendiente → en_progreso → completada → pendiente
+    let newStatus;
+    switch (task.estado) {
+      case 'pendiente':
+        newStatus = 'en_progreso';
+        break;
+      case 'en_progreso':
+        newStatus = 'completada';
+        break;
+      case 'completada':
+        newStatus = 'pendiente';
+        break;
+      case 'cancelada':
+        newStatus = 'pendiente'; // Reactivate cancelled task
+        break;
+      default:
+        newStatus = 'pendiente';
+    }
     await handleStatusChange(task.id, newStatus);
   };
 
@@ -137,14 +154,29 @@ function Tasks() {
   };
 
   const TaskCard = ({ task }) => (
-    <div className={`p-4 bg-white rounded-lg border ${isOverdue(task) ? 'border-danger-300 bg-danger-50' : 'border-gray-200'} group`}>
+    <div className={`p-4 bg-white rounded-lg border ${isOverdue(task) ? 'border-danger-300 bg-danger-50' : 'border-gray-200'} group overflow-visible`}>
       <div className="flex items-start gap-3">
         <button
           onClick={() => toggleComplete(task)}
-          className={`mt-0.5 flex-shrink-0 ${task.estado === 'completada' ? 'text-success-500' : 'text-gray-300 hover:text-success-500'}`}
+          className={`mt-0.5 flex-shrink-0 transition-colors ${
+            task.estado === 'completada'
+              ? 'text-success-500'
+              : task.estado === 'en_progreso'
+                ? 'text-primary-500 hover:text-success-500'
+                : 'text-gray-300 hover:text-primary-500'
+          }`}
+          title={
+            task.estado === 'pendiente'
+              ? 'Click to start (In Progress)'
+              : task.estado === 'en_progreso'
+                ? 'Click to complete'
+                : 'Click to reopen'
+          }
         >
           {task.estado === 'completada' ? (
             <CheckCircleSolidIcon className="h-6 w-6" />
+          ) : task.estado === 'en_progreso' ? (
+            <ClockIcon className="h-6 w-6" />
           ) : (
             <CheckCircleIcon className="h-6 w-6" />
           )}
@@ -167,17 +199,19 @@ function Tasks() {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={() => openEditModal(task)}
-                        className={`${active ? 'bg-gray-50' : ''} flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700`}
-                      >
-                        <PencilIcon className="h-4 w-4" /> Edit
-                      </button>
-                    )}
-                  </Menu.Item>
+                <Menu.Items className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  {task.estado !== 'completada' && (
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={() => openEditModal(task)}
+                          className={`${active ? 'bg-gray-50' : ''} flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700`}
+                        >
+                          <PencilIcon className="h-4 w-4" /> Edit
+                        </button>
+                      )}
+                    </Menu.Item>
+                  )}
                   <Menu.Item>
                     {({ active }) => (
                       <button

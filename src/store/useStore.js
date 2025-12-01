@@ -320,19 +320,40 @@ export const useTasksStore = create((set, get) => ({
   summary: null,
   pagination: null,
   isLoading: false,
+  currentAccountId: null,
 
   fetchTasks: async (params = {}) => {
     set({ isLoading: true });
     try {
-      const { data } = await tasksAPI.getAll(params);
-      set({
-        tasks: data.data,
-        pagination: data.pagination,
-        isLoading: false,
-      });
+      const { accountId, ...otherParams } = params;
+      let data;
+
+      if (accountId) {
+        // Account-scoped tasks - returns array directly
+        const response = await tasksAPI.getByAccount(accountId, otherParams);
+        data = response.data;
+        // Backend returns array directly for account tasks
+        const tasks = Array.isArray(data) ? data : (data.data || data.tasks || []);
+        set({
+          tasks,
+          pagination: data.pagination || null,
+          isLoading: false,
+          currentAccountId: accountId,
+        });
+      } else {
+        // Global tasks - returns { data: [...], pagination: {...} }
+        const response = await tasksAPI.getAll(otherParams);
+        data = response.data;
+        set({
+          tasks: data.data || [],
+          pagination: data.pagination || null,
+          isLoading: false,
+          currentAccountId: null,
+        });
+      }
       return data;
     } catch (error) {
-      set({ isLoading: false });
+      set({ isLoading: false, tasks: [] });
       throw error;
     }
   },
@@ -349,9 +370,21 @@ export const useTasksStore = create((set, get) => ({
 
   createTask: async (taskData) => {
     try {
-      const { data } = await tasksAPI.create(taskData);
-      set({ tasks: [data.task, ...get().tasks] });
-      return data.task;
+      const accountId = get().currentAccountId || taskData.id_cuenta;
+      let data;
+
+      if (accountId) {
+        const response = await tasksAPI.createForAccount(accountId, taskData);
+        data = response.data;
+      } else {
+        const response = await tasksAPI.create(taskData);
+        data = response.data;
+      }
+
+      // Backend returns task directly for account tasks, or { task: ... } for global
+      const newTask = data.task || data;
+      set({ tasks: [newTask, ...get().tasks] });
+      return newTask;
     } catch (error) {
       throw error;
     }
@@ -359,13 +392,25 @@ export const useTasksStore = create((set, get) => ({
 
   updateTask: async (taskId, taskData) => {
     try {
-      const { data } = await tasksAPI.update(taskId, taskData);
+      const accountId = get().currentAccountId;
+      let data;
+
+      if (accountId) {
+        const response = await tasksAPI.updateForAccount(accountId, taskId, taskData);
+        data = response.data;
+      } else {
+        const response = await tasksAPI.update(taskId, taskData);
+        data = response.data;
+      }
+
+      // Backend returns task directly for account tasks, or { task: ... } for global
+      const updatedTask = data.task || data;
       set({
         tasks: get().tasks.map((t) =>
-          t.id === taskId ? { ...t, ...data.task } : t
+          t.id === taskId ? { ...t, ...updatedTask } : t
         ),
       });
-      return data.task;
+      return updatedTask;
     } catch (error) {
       throw error;
     }
@@ -376,7 +421,7 @@ export const useTasksStore = create((set, get) => ({
       const { data } = await tasksAPI.updateStatus(taskId, { estado, comentario });
       set({
         tasks: get().tasks.map((t) =>
-          t.id === taskId ? { ...t, estado: data.task.estadoNuevo } : t
+          t.id === taskId ? { ...t, estado: data.task?.estadoNuevo || estado } : t
         ),
       });
       return data.task;
@@ -387,7 +432,13 @@ export const useTasksStore = create((set, get) => ({
 
   deleteTask: async (taskId) => {
     try {
-      await tasksAPI.delete(taskId);
+      const accountId = get().currentAccountId;
+
+      if (accountId) {
+        await tasksAPI.deleteForAccount(accountId, taskId);
+      } else {
+        await tasksAPI.delete(taskId);
+      }
       set({ tasks: get().tasks.filter((t) => t.id !== taskId) });
     } catch (error) {
       throw error;

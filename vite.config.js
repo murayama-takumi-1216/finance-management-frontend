@@ -9,7 +9,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         // target: 'http://localhost:3000',
-        target: 'https://finance-management-express-backend-production.up.railway.app';
+        target: 'https://finance-management-express-backend-production.up.railway.app',
         changeOrigin: true,
       }
     }

@@ -513,8 +513,10 @@ export const useEventsStore = create((set, get) => ({
     try {
       if (accountId) {
         const { data } = await remindersAPI.getByAccount(accountId);
-        set({ reminders: data.reminders || [] });
-        return data.reminders || [];
+        // Backend returns array directly
+        const reminders = Array.isArray(data) ? data : (data.reminders || []);
+        set({ reminders });
+        return reminders;
       }
       set({ reminders: [] });
       return [];
@@ -527,8 +529,10 @@ export const useEventsStore = create((set, get) => ({
   createReminder: async (accountId, reminderData) => {
     try {
       const { data } = await remindersAPI.createForAccount(accountId, reminderData);
-      set({ reminders: [...get().reminders, data.reminder] });
-      return data.reminder;
+      // Backend returns reminder directly
+      const newReminder = data.reminder || data;
+      set({ reminders: [...get().reminders, newReminder] });
+      return newReminder;
     } catch (error) {
       throw error;
     }

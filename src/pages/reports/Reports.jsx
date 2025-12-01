@@ -132,13 +132,62 @@ function Reports() {
         reportsAPI.getSpendingByProvider(accountId, { start, end, limit: 10 }),
       ]);
 
-      setTotals(totalsRes.data);
-      setExpensesByCategory(expensesRes.data);
-      setIncomeByCategory(incomeRes.data);
-      setMonthlyTrends(trendsRes.data);
-      setTopCategories(topRes.data);
-      setComparison(comparisonRes.data);
-      setSpendingByProvider(providerRes.data);
+      // Handle wrapped responses from backend
+      // getTotals returns { totals: [...], agrupacion }
+      // But for simple date range queries, it may return direct totals
+      const totalsData = totalsRes.data?.totals?.[0] || totalsRes.data;
+      setTotals({
+        ingresos: totalsData?.totalIngresos ?? totalsData?.ingresos ?? 0,
+        gastos: totalsData?.totalGastos ?? totalsData?.gastos ?? 0,
+        balance: totalsData?.saldo ?? totalsData?.balance ?? (totalsData?.totalIngresos ?? 0) - (totalsData?.totalGastos ?? 0),
+        numMovimientos: totalsData?.numMovimientos ?? 0
+      });
+
+      // getExpensesByCategory returns { categories: [...], totalGastos, periodo }
+      setExpensesByCategory(expensesRes.data?.categories || expensesRes.data || []);
+
+      // getIncomeByCategory returns { categories: [...], totalIngresos, periodo }
+      setIncomeByCategory(incomeRes.data?.categories || incomeRes.data || []);
+
+      // getMonthlyTrends returns { trends: [...], promedios, numMeses }
+      const trendsData = trendsRes.data?.trends || trendsRes.data || [];
+      setMonthlyTrends(trendsData.map(t => ({
+        mes: t.periodo,
+        ingresos: t.ingresos,
+        gastos: t.gastos,
+        num_movimientos: t.numMovimientos
+      })));
+
+      // getTopCategories returns { ranking: [...], tipo, periodo }
+      // Add tipo field from the API response type to each category
+      const topCatData = topRes.data?.ranking || topRes.data || [];
+      const topCatType = topRes.data?.tipo || 'gasto';
+      setTopCategories(topCatData.map(c => ({
+        ...c,
+        tipo: topCatType
+      })));
+
+      // comparePeriods returns { comparison: [...], resumen: { periodoA, periodoB, variacion } }
+      const compData = comparisonRes.data;
+      if (compData?.resumen) {
+        setComparison({
+          periodo1: compData.resumen.periodoA,
+          periodo2: compData.resumen.periodoB,
+          cambio_ingresos: compData.resumen.variacion?.ingresos,
+          cambio_gastos: compData.resumen.variacion?.gastos,
+          cambio_balance: compData.resumen.variacion?.saldo
+        });
+      } else {
+        setComparison(null);
+      }
+
+      // getSpendingByProvider returns { providers: [...], periodo }
+      const providersData = providerRes.data?.providers || providerRes.data || [];
+      setSpendingByProvider(providersData.map(p => ({
+        proveedor: p.proveedor,
+        total: p.total,
+        cantidad: p.numMovimientos
+      })));
     } catch (error) {
       console.error('Failed to load reports:', error);
     } finally {

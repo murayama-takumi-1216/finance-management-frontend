@@ -433,9 +433,10 @@ function Calendar() {
             <div className="card">
               <h3 className="card-title mb-4">Reminders</h3>
               <div className="space-y-3">
-                {(reminders || [])
+                {(reminders ?? [])
+                  .filter(Boolean)
                   .filter(r => !r.enviado)
-                  .sort((a, b) => new Date(a.fechaRecordatorio) - new Date(b.fechaRecordatorio))
+                  .sort((a, b) => new Date(a.fechaRecordatorio || 0) - new Date(b.fechaRecordatorio || 0))
                   .slice(0, 5)
                   .map(reminder => (
                     <div key={reminder.id} className="p-3 bg-warning-50 rounded-lg group">
@@ -456,7 +457,7 @@ function Calendar() {
                       </div>
                     </div>
                   ))}
-                {(reminders || []).filter(r => !r.enviado).length === 0 && (
+                {(reminders ?? []).filter(Boolean).filter(r => !r.enviado).length === 0 && (
                   <p className="text-gray-500 text-center py-4">No active reminders</p>
                 )}
               </div>

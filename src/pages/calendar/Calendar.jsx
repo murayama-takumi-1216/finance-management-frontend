@@ -49,6 +49,7 @@ function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showViewEventsModal, setShowViewEventsModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [eventDate, setEventDate] = useState(new Date());
@@ -159,6 +160,16 @@ function Calendar() {
       reset({ titulo: '', descripcion: '', tipo: 'pago_unico', monto: '', recurrencia: '', categoria_id: '' });
     }
     setShowEventModal(true);
+  };
+
+  const openViewEventsModal = (date) => {
+    setSelectedDate(date);
+    setShowViewEventsModal(true);
+  };
+
+  const openAddEventFromView = () => {
+    setShowViewEventsModal(false);
+    openEventModal(selectedDate);
   };
 
   const openReminderModal = () => {
@@ -306,7 +317,7 @@ function Calendar() {
               return (
                 <div
                   key={idx}
-                  onClick={() => openEventModal(day.date)}
+                  onClick={() => openViewEventsModal(day.date)}
                   className={`min-h-24 p-2 cursor-pointer transition-colors ${day.isCurrentMonth ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'
                     }`}
                 >
@@ -587,6 +598,114 @@ function Calendar() {
                       </button>
                     </div>
                   </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* View Events Modal */}
+      <Transition appear show={showViewEventsModal} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setShowViewEventsModal(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-8 shadow-xl transition-all">
+                  <div className="flex items-center justify-between mb-8">
+                    <Dialog.Title className="text-xl font-semibold">
+                      {selectedDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    </Dialog.Title>
+                    <button onClick={() => setShowViewEventsModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                      <XMarkIcon className="h-6 w-6" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4 mb-8 max-h-96 overflow-y-auto">
+                    {selectedDate && getEventsForDate(selectedDate).length > 0 ? (
+                      getEventsForDate(selectedDate).map(event => (
+                        <div key={event.id} className="p-4 bg-gray-50 rounded-lg group">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900">{event.titulo}</p>
+                              <p className="text-sm text-gray-500 mt-1">
+                                {eventTypeOptions.find(t => t.value === event.tipo)?.label || event.tipo}
+                              </p>
+                              {event.monto && (
+                                <p className="text-sm font-medium text-primary-600 mt-1">
+                                  {formatCurrency(event.monto)}
+                                </p>
+                              )}
+                              {event.descripcion && (
+                                <p className="text-sm text-gray-500 mt-2">{event.descripcion}</p>
+                              )}
+                              {event.recurrencia && event.recurrencia !== 'ninguna' && (
+                                <p className="text-xs text-gray-400 flex items-center gap-1 mt-2">
+                                  <ArrowPathIcon className="h-3 w-3" />
+                                  {recurrenceOptions.find(r => r.value === event.recurrencia)?.label}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => {
+                                  setShowViewEventsModal(false);
+                                  openEventModal(null, event);
+                                }}
+                                className="p-1 hover:bg-gray-200 rounded"
+                              >
+                                <PencilIcon className="h-4 w-4 text-gray-500" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setShowViewEventsModal(false);
+                                  setDeleteConfirm(event);
+                                }}
+                                className="p-1 hover:bg-danger-50 rounded"
+                              >
+                                <TrashIcon className="h-4 w-4 text-danger-500" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <CalendarDaysIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p>No events for this day</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={() => setShowViewEventsModal(false)} className="btn-secondary flex-1">
+                      Close
+                    </button>
+                    <button onClick={openAddEventFromView} className="btn-primary flex-1">
+                      <PlusIcon className="h-5 w-5 mr-2" />
+                      Add Event
+                    </button>
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

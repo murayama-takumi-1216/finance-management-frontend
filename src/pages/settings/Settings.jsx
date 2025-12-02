@@ -11,9 +11,12 @@ import {
   XMarkIcon,
   SpeakerWaveIcon,
   PlayIcon,
+  ArrowUpTrayIcon,
+  TrashIcon,
+  MusicalNoteIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useNotificationsStore } from '../../store/useStore';
-import { usersAPI, integrationsAPI } from '../../services/api';
+import { usersAPI, integrationsAPI, preferencesAPI } from '../../services/api';
 import notificationSound, { NOTIFICATION_SOUNDS } from '../../utils/notificationSound';
 
 function Settings() {
@@ -25,19 +28,57 @@ function Settings() {
   const [integrations, setIntegrations] = useState([]);
   const [loadingIntegrations, setLoadingIntegrations] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
-  const [localVolume, setLocalVolume] = useState(80);
 
-  // Sync local volume with preferences
-  useEffect(() => {
-    if (preferences?.notificationVolume !== undefined) {
-      setLocalVolume(preferences.notificationVolume);
+  // Local state for notification preferences (for Save button approach)
+  const [localPreferences, setLocalPreferences] = useState({
+    notificationsEnabled: true,
+    browserNotifications: true,
+    emailNotifications: true,
+    notificationSound: 'default',
+    notificationVolume: 80,
+    quietHoursEnabled: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '08:00',
+  });
+  const [preferencesChanged, setPreferencesChanged] = useState(false);
+  const [customSounds, setCustomSounds] = useState([]);
+  const [uploadingSound, setUploadingSound] = useState(false);
+  const fileInputRef = useState(null);
+
+  // Fetch custom sounds
+  const fetchCustomSounds = async () => {
+    try {
+      const { data } = await preferencesAPI.getSounds();
+      setCustomSounds(data.custom || []);
+    } catch (error) {
+      console.error('Failed to fetch custom sounds:', error);
     }
-  }, [preferences?.notificationVolume]);
+  };
 
-  // Load preferences when notifications tab is active
+  // Sync local preferences with fetched preferences
   useEffect(() => {
-    if (activeTab === 'notifications' && !preferences) {
-      fetchPreferences().catch(console.error);
+    if (preferences) {
+      setLocalPreferences({
+        notificationsEnabled: preferences.notificationsEnabled ?? true,
+        browserNotifications: preferences.browserNotifications ?? true,
+        emailNotifications: preferences.emailNotifications ?? true,
+        notificationSound: preferences.notificationSound || 'default',
+        notificationVolume: preferences.notificationVolume ?? 80,
+        quietHoursEnabled: preferences.quietHoursEnabled ?? false,
+        quietHoursStart: preferences.quietHoursStart || '22:00',
+        quietHoursEnd: preferences.quietHoursEnd || '08:00',
+      });
+      setPreferencesChanged(false);
+    }
+  }, [preferences]);
+
+  // Load preferences and custom sounds when notifications tab is active
+  useEffect(() => {
+    if (activeTab === 'notifications') {
+      if (!preferences) {
+        fetchPreferences().catch(console.error);
+      }
+      fetchCustomSounds();
     }
   }, [activeTab, preferences, fetchPreferences]);
 
@@ -49,29 +90,96 @@ function Settings() {
     }
   }, [preferences]);
 
-  const handlePreferenceChange = async (key, value) => {
+  // Handle local preference change (doesn't save to backend yet)
+  const handleLocalPreferenceChange = (key, value) => {
+    setLocalPreferences(prev => ({ ...prev, [key]: value }));
+    setPreferencesChanged(true);
+
+    // Update sound manager in real-time for volume
+    if (key === 'notificationVolume') {
+      notificationSound.setVolume(value);
+    }
+  };
+
+  // Save all preferences to backend
+  const handleSavePreferences = async () => {
     setSavingPreferences(true);
     try {
-      await updatePreferences({ [key]: value });
-      toast.success('Preference saved');
+      await updatePreferences(localPreferences);
+      toast.success('Settings saved successfully');
+      setPreferencesChanged(false);
     } catch (error) {
-      toast.error('Failed to save preference');
+      toast.error('Failed to save settings');
     } finally {
       setSavingPreferences(false);
     }
   };
 
-  const handleSoundChange = async (soundId) => {
-    await handlePreferenceChange('notificationSound', soundId);
-  };
-
-  const handleVolumeChange = async (volume) => {
-    notificationSound.setVolume(volume);
-    await handlePreferenceChange('notificationVolume', volume);
-  };
-
   const previewSound = (soundId) => {
-    notificationSound.preview(soundId, localVolume);
+    // Find the sound URL if it's a custom sound
+    const customSound = customSounds.find(s => s.id === soundId);
+    const customUrl = customSound ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}${customSound.url}` : null;
+    notificationSound.preview(soundId, localPreferences.notificationVolume, customUrl);
+  };
+
+  // Handle custom sound upload
+  const handleSoundUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a valid audio file (MP3, WAV, or OGG)');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    setUploadingSound(true);
+    try {
+      const formData = new FormData();
+      formData.append('sound', file);
+      formData.append('name', file.name.replace(/\.[^/.]+$/, '')); // Remove extension for name
+
+      const { data } = await preferencesAPI.uploadSound(formData);
+      toast.success('Sound uploaded successfully');
+
+      // Refresh custom sounds list
+      await fetchCustomSounds();
+
+      // Select the newly uploaded sound
+      handleLocalPreferenceChange('notificationSound', data.sound.id);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to upload sound');
+    } finally {
+      setUploadingSound(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  // Handle custom sound deletion
+  const handleDeleteSound = async (soundId) => {
+    const numericId = soundId.replace('custom_', '');
+    try {
+      await preferencesAPI.deleteSound(numericId);
+      toast.success('Sound deleted');
+
+      // If this was the selected sound, switch to default
+      if (localPreferences.notificationSound === soundId) {
+        handleLocalPreferenceChange('notificationSound', 'default');
+      }
+
+      // Refresh custom sounds list
+      await fetchCustomSounds();
+    } catch (error) {
+      toast.error('Failed to delete sound');
+    }
   };
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
@@ -275,9 +383,8 @@ function Settings() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={preferences?.notificationsEnabled ?? true}
-                        onChange={(e) => handlePreferenceChange('notificationsEnabled', e.target.checked)}
-                        disabled={savingPreferences}
+                        checked={localPreferences.notificationsEnabled}
+                        onChange={(e) => handleLocalPreferenceChange('notificationsEnabled', e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
@@ -292,9 +399,8 @@ function Settings() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={preferences?.browserNotifications ?? true}
-                        onChange={(e) => handlePreferenceChange('browserNotifications', e.target.checked)}
-                        disabled={savingPreferences}
+                        checked={localPreferences.browserNotifications}
+                        onChange={(e) => handleLocalPreferenceChange('browserNotifications', e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
@@ -309,9 +415,8 @@ function Settings() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={preferences?.emailNotifications ?? true}
-                        onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
-                        disabled={savingPreferences}
+                        checked={localPreferences.emailNotifications}
+                        onChange={(e) => handleLocalPreferenceChange('emailNotifications', e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
@@ -327,22 +432,22 @@ function Settings() {
                   Sound Settings
                 </h2>
                 <div className="space-y-6">
-                  {/* Sound Selection */}
+                  {/* Built-in Sound Selection */}
                   <div>
-                    <label className="label">Notification Sound</label>
+                    <label className="label">Built-in Sounds</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {NOTIFICATION_SOUNDS.map((sound) => (
                         <div
                           key={sound.id}
                           className={`relative flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                            preferences?.notificationSound === sound.id
+                            localPreferences.notificationSound === sound.id
                               ? 'border-primary-500 bg-primary-50'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
-                          onClick={() => handleSoundChange(sound.id)}
+                          onClick={() => handleLocalPreferenceChange('notificationSound', sound.id)}
                         >
                           <span className={`font-medium ${
-                            preferences?.notificationSound === sound.id
+                            localPreferences.notificationSound === sound.id
                               ? 'text-primary-700'
                               : 'text-gray-700'
                           }`}>
@@ -366,6 +471,78 @@ function Settings() {
                     </div>
                   </div>
 
+                  {/* Custom Sounds */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="label mb-0">My Custom Sounds</label>
+                      <label className="btn-secondary text-sm cursor-pointer">
+                        <ArrowUpTrayIcon className="h-4 w-4 mr-2" />
+                        {uploadingSound ? 'Uploading...' : 'Upload Sound'}
+                        <input
+                          type="file"
+                          accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/webm"
+                          onChange={handleSoundUpload}
+                          disabled={uploadingSound}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    {customSounds.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {customSounds.map((sound) => (
+                          <div
+                            key={sound.id}
+                            className={`relative flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                              localPreferences.notificationSound === sound.id
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => handleLocalPreferenceChange('notificationSound', sound.id)}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <MusicalNoteIcon className="h-4 w-4 flex-shrink-0 text-primary-500" />
+                              <span className={`font-medium truncate ${
+                                localPreferences.notificationSound === sound.id
+                                  ? 'text-primary-700'
+                                  : 'text-gray-700'
+                              }`}>
+                                {sound.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  previewSound(sound.id);
+                                }}
+                                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                                title="Preview sound"
+                              >
+                                <PlayIcon className="h-4 w-4 text-gray-600" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteSound(sound.id);
+                                }}
+                                className="p-1.5 rounded-full hover:bg-red-100 transition-colors"
+                                title="Delete sound"
+                              >
+                                <TrashIcon className="h-4 w-4 text-red-500" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">
+                        No custom sounds uploaded yet. Upload your own MP3, WAV, or OGG files.
+                      </p>
+                    )}
+                  </div>
+
                   {/* Volume Control */}
                   <div>
                     <label className="label">Volume</label>
@@ -375,23 +552,20 @@ function Settings() {
                         type="range"
                         min="0"
                         max="100"
-                        value={localVolume}
+                        value={localPreferences.notificationVolume}
                         onChange={(e) => {
                           const volume = parseInt(e.target.value);
-                          setLocalVolume(volume);
-                          notificationSound.setVolume(volume);
+                          handleLocalPreferenceChange('notificationVolume', volume);
                         }}
-                        onMouseUp={(e) => handleVolumeChange(parseInt(e.target.value))}
-                        onTouchEnd={(e) => handleVolumeChange(parseInt(e.target.value))}
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                       />
                       <span className="text-sm font-medium text-gray-600 w-10">
-                        {localVolume}%
+                        {localPreferences.notificationVolume}%
                       </span>
                     </div>
                     <button
                       type="button"
-                      onClick={() => previewSound(preferences?.notificationSound || 'default')}
+                      onClick={() => previewSound(localPreferences.notificationSound)}
                       className="mt-3 btn-secondary text-sm"
                     >
                       <PlayIcon className="h-4 w-4 mr-2" />
@@ -413,23 +587,22 @@ function Settings() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={preferences?.quietHoursEnabled ?? false}
-                        onChange={(e) => handlePreferenceChange('quietHoursEnabled', e.target.checked)}
-                        disabled={savingPreferences}
+                        checked={localPreferences.quietHoursEnabled}
+                        onChange={(e) => handleLocalPreferenceChange('quietHoursEnabled', e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                     </label>
                   </div>
 
-                  {preferences?.quietHoursEnabled && (
+                  {localPreferences.quietHoursEnabled && (
                     <div className="grid grid-cols-2 gap-4 pt-2">
                       <div>
                         <label className="label">Start Time</label>
                         <input
                           type="time"
-                          value={preferences?.quietHoursStart || '22:00'}
-                          onChange={(e) => handlePreferenceChange('quietHoursStart', e.target.value)}
+                          value={localPreferences.quietHoursStart}
+                          onChange={(e) => handleLocalPreferenceChange('quietHoursStart', e.target.value)}
                           className="input"
                         />
                       </div>
@@ -437,14 +610,26 @@ function Settings() {
                         <label className="label">End Time</label>
                         <input
                           type="time"
-                          value={preferences?.quietHoursEnd || '08:00'}
-                          onChange={(e) => handlePreferenceChange('quietHoursEnd', e.target.value)}
+                          value={localPreferences.quietHoursEnd}
+                          onChange={(e) => handleLocalPreferenceChange('quietHoursEnd', e.target.value)}
                           className="input"
                         />
                       </div>
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSavePreferences}
+                  disabled={savingPreferences || !preferencesChanged}
+                  className="btn-primary px-8"
+                >
+                  {savingPreferences ? 'Saving...' : 'Save'}
+                </button>
               </div>
             </div>
           )}

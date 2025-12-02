@@ -187,6 +187,10 @@ export const preferencesAPI = {
   get: () => api.get('/preferences'),
   update: (data) => api.put('/preferences', data),
   getSounds: () => api.get('/preferences/sounds'),
+  uploadSound: (formData) => api.post('/preferences/sounds/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  deleteSound: (soundId) => api.delete(`/preferences/sounds/${soundId}`),
 };
 
 // Reports API

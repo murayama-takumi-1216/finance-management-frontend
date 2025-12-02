@@ -6,6 +6,7 @@ class NotificationSoundManager {
     this.audioContext = null;
     this.volume = 0.8;
     this.enabled = true;
+    this.customSounds = {}; // Cache for custom sound Audio elements
   }
 
   initAudioContext() {
@@ -182,12 +183,42 @@ class NotificationSoundManager {
     osc.stop(ctx.currentTime + 0.65);
   }
 
-  play(soundId = 'default') {
+  // Play a custom uploaded sound file
+  playCustomSound(url) {
+    return new Promise((resolve, reject) => {
+      // Check cache first
+      if (!this.customSounds[url]) {
+        this.customSounds[url] = new Audio(url);
+      }
+
+      const audio = this.customSounds[url];
+      audio.volume = this.volume;
+      audio.currentTime = 0;
+
+      audio.onended = () => resolve();
+      audio.onerror = (e) => reject(e);
+
+      audio.play().catch(reject);
+    });
+  }
+
+  play(soundId = 'default', customUrl = null) {
     if (!this.enabled || soundId === 'none') {
       return;
     }
 
     try {
+      // Handle custom sounds (start with 'custom_')
+      if (soundId.startsWith('custom_') && customUrl) {
+        this.playCustomSound(customUrl).catch(err => {
+          console.warn('Failed to play custom sound:', err);
+          // Fallback to default sound
+          const ctx = this.initAudioContext();
+          this.playDefault(ctx);
+        });
+        return;
+      }
+
       const ctx = this.initAudioContext();
 
       switch (soundId) {
@@ -224,7 +255,7 @@ class NotificationSoundManager {
   }
 
   // Preview sound for settings - always plays regardless of enabled state
-  preview(soundId, volume) {
+  preview(soundId, volume, customUrl = null) {
     if (soundId === 'none') {
       return;
     }
@@ -237,10 +268,23 @@ class NotificationSoundManager {
     }
     this.enabled = true; // Force enable for preview
 
-    this.play(soundId);
+    this.play(soundId, customUrl);
 
     this.volume = originalVolume;
     this.enabled = originalEnabled;
+  }
+
+  // Preload a custom sound for faster playback
+  preloadCustomSound(url) {
+    if (!this.customSounds[url]) {
+      this.customSounds[url] = new Audio(url);
+      this.customSounds[url].preload = 'auto';
+    }
+  }
+
+  // Clear custom sound cache
+  clearCustomSoundCache() {
+    this.customSounds = {};
   }
 }
 

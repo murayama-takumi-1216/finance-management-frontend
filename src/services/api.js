@@ -172,6 +172,23 @@ export const integrationsAPI = {
   delete: (type) => api.delete(`/integrations/calendar/${type}`),
 };
 
+// Notifications API
+export const notificationsAPI = {
+  getAll: (params) => api.get('/notifications', { params }),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
+  markAllAsRead: () => api.put('/notifications/read-all'),
+  delete: (notificationId) => api.delete(`/notifications/${notificationId}`),
+  clearAll: () => api.delete('/notifications'),
+};
+
+// User Preferences API
+export const preferencesAPI = {
+  get: () => api.get('/preferences'),
+  update: (data) => api.put('/preferences', data),
+  getSounds: () => api.get('/preferences/sounds'),
+};
+
 // Reports API
 export const reportsAPI = {
   getTotals: (accountId, params) =>

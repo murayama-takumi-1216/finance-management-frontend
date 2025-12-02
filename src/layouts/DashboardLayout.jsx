@@ -18,6 +18,7 @@ import {
   DocumentChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useAccountsStore, useUIStore } from '../store/useStore';
+import NotificationBell from '../components/NotificationBell';
 
 const mainNavItems = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -178,6 +179,9 @@ function DashboardLayout() {
             )}
 
             <div className="flex flex-1 items-center justify-end gap-x-4 lg:gap-x-6">
+              {/* Notification Bell */}
+              <NotificationBell />
+
               {/* User menu */}
               <Menu as="div" className="relative">
                 <Menu.Button className="-m-1.5 flex items-center p-1.5">

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authAPI, accountsAPI, categoriesAPI, tagsAPI, tasksAPI, eventsAPI, remindersAPI } from '../services/api';
+import { authAPI, accountsAPI, categoriesAPI, tagsAPI, tasksAPI, eventsAPI, remindersAPI, notificationsAPI, preferencesAPI } from '../services/api';
 
 // Auth Store
 export const useAuthStore = create(
@@ -604,4 +604,121 @@ export const useUIStore = create((set) => ({
   sidebarOpen: true,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+}));
+
+// Notifications Store
+export const useNotificationsStore = create((set, get) => ({
+  notifications: [],
+  unreadCount: 0,
+  isLoading: false,
+  preferences: null,
+  availableSounds: [],
+
+  fetchNotifications: async (params = {}) => {
+    set({ isLoading: true });
+    try {
+      const { data } = await notificationsAPI.getAll(params);
+      set({
+        notifications: data.notifications || [],
+        unreadCount: data.unreadCount || 0,
+        isLoading: false,
+      });
+      return data;
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  fetchUnreadCount: async () => {
+    try {
+      const { data } = await notificationsAPI.getUnreadCount();
+      set({ unreadCount: data.count || 0 });
+      return data.count;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  markAsRead: async (notificationId) => {
+    try {
+      await notificationsAPI.markAsRead(notificationId);
+      set({
+        notifications: get().notifications.map((n) =>
+          n.id === notificationId ? { ...n, leido: true } : n
+        ),
+        unreadCount: Math.max(0, get().unreadCount - 1),
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  markAllAsRead: async () => {
+    try {
+      await notificationsAPI.markAllAsRead();
+      set({
+        notifications: get().notifications.map((n) => ({ ...n, leido: true })),
+        unreadCount: 0,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteNotification: async (notificationId) => {
+    try {
+      await notificationsAPI.delete(notificationId);
+      const notification = get().notifications.find((n) => n.id === notificationId);
+      set({
+        notifications: get().notifications.filter((n) => n.id !== notificationId),
+        unreadCount: notification && !notification.leido
+          ? Math.max(0, get().unreadCount - 1)
+          : get().unreadCount,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  clearAllNotifications: async () => {
+    try {
+      await notificationsAPI.clearAll();
+      set({ notifications: [], unreadCount: 0 });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Add notification locally (for real-time updates)
+  addNotification: (notification) => {
+    set({
+      notifications: [notification, ...get().notifications],
+      unreadCount: get().unreadCount + 1,
+    });
+  },
+
+  // Preferences
+  fetchPreferences: async () => {
+    try {
+      const { data } = await preferencesAPI.get();
+      set({
+        preferences: data.preferences,
+        availableSounds: data.availableSounds || [],
+      });
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updatePreferences: async (preferencesData) => {
+    try {
+      const { data } = await preferencesAPI.update(preferencesData);
+      set({ preferences: data.preferences });
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
 }));

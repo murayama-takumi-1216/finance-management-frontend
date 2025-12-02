@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -9,17 +9,62 @@ import {
   DevicePhoneMobileIcon,
   ShieldCheckIcon,
   XMarkIcon,
+  SpeakerWaveIcon,
+  PlayIcon,
 } from '@heroicons/react/24/outline';
-import { useAuthStore } from '../../store/useStore';
+import { useAuthStore, useNotificationsStore } from '../../store/useStore';
 import { usersAPI, integrationsAPI } from '../../services/api';
+import notificationSound, { NOTIFICATION_SOUNDS } from '../../utils/notificationSound';
 
 function Settings() {
   const { user, checkAuth } = useAuthStore();
+  const { preferences, fetchPreferences, updatePreferences } = useNotificationsStore();
   const [activeTab, setActiveTab] = useState('profile');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [integrations, setIntegrations] = useState([]);
   const [loadingIntegrations, setLoadingIntegrations] = useState(false);
+  const [savingPreferences, setSavingPreferences] = useState(false);
+
+  // Load preferences when notifications tab is active
+  useEffect(() => {
+    if (activeTab === 'notifications' && !preferences) {
+      fetchPreferences().catch(console.error);
+    }
+  }, [activeTab, preferences, fetchPreferences]);
+
+  // Update notification sound manager when preferences change
+  useEffect(() => {
+    if (preferences) {
+      notificationSound.setEnabled(preferences.notificationsEnabled);
+      notificationSound.setVolume(preferences.notificationVolume);
+    }
+  }, [preferences]);
+
+  const handlePreferenceChange = async (key, value) => {
+    setSavingPreferences(true);
+    try {
+      await updatePreferences({ [key]: value });
+      toast.success('Preference saved');
+    } catch (error) {
+      toast.error('Failed to save preference');
+    } finally {
+      setSavingPreferences(false);
+    }
+  };
+
+  const handleSoundChange = async (soundId) => {
+    await handlePreferenceChange('notificationSound', soundId);
+  };
+
+  const handleVolumeChange = async (volume) => {
+    notificationSound.setVolume(volume);
+    await handlePreferenceChange('notificationVolume', volume);
+  };
+
+  const previewSound = (soundId) => {
+    notificationSound.preview(soundId, preferences?.notificationVolume || 80);
+  };
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
@@ -209,51 +254,187 @@ function Settings() {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="card">
-              <h2 className="card-title mb-6">Notification Preferences</h2>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Email Notifications</p>
-                    <p className="text-sm text-gray-500">Receive email updates about your account activity</p>
+            <div className="space-y-6">
+              {/* General Notification Settings */}
+              <div className="card">
+                <h2 className="card-title mb-6">General Settings</h2>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Enable Notifications</p>
+                      <p className="text-sm text-gray-500">Receive in-app notifications</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences?.notificationsEnabled ?? true}
+                        onChange={(e) => handlePreferenceChange('notificationsEnabled', e.target.checked)}
+                        disabled={savingPreferences}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" defaultChecked className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                  </label>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Payment Reminders</p>
-                    <p className="text-sm text-gray-500">Get reminded before payment due dates</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Browser Notifications</p>
+                      <p className="text-sm text-gray-500">Show desktop notifications</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences?.browserNotifications ?? true}
+                        onChange={(e) => handlePreferenceChange('browserNotifications', e.target.checked)}
+                        disabled={savingPreferences}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" defaultChecked className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                  </label>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Weekly Summary</p>
-                    <p className="text-sm text-gray-500">Receive a weekly summary of your finances</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Email Notifications</p>
+                      <p className="text-sm text-gray-500">Receive email updates about your account activity</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences?.emailNotifications ?? true}
+                        onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
+                        disabled={savingPreferences}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                  </label>
                 </div>
+              </div>
 
-                <div className="flex items-center justify-between">
+              {/* Notification Sound Settings */}
+              <div className="card">
+                <h2 className="card-title mb-6">
+                  <SpeakerWaveIcon className="h-5 w-5 inline mr-2" />
+                  Sound Settings
+                </h2>
+                <div className="space-y-6">
+                  {/* Sound Selection */}
                   <div>
-                    <p className="font-medium text-gray-900">Task Deadlines</p>
-                    <p className="text-sm text-gray-500">Get notified when tasks are due</p>
+                    <label className="label">Notification Sound</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {NOTIFICATION_SOUNDS.map((sound) => (
+                        <div
+                          key={sound.id}
+                          className={`relative flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                            preferences?.notificationSound === sound.id
+                              ? 'border-primary-500 bg-primary-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => handleSoundChange(sound.id)}
+                        >
+                          <span className={`font-medium ${
+                            preferences?.notificationSound === sound.id
+                              ? 'text-primary-700'
+                              : 'text-gray-700'
+                          }`}>
+                            {sound.name}
+                          </span>
+                          {sound.id !== 'none' && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                previewSound(sound.id);
+                              }}
+                              className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                              title="Preview sound"
+                            >
+                              <PlayIcon className="h-4 w-4 text-gray-600" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" defaultChecked className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                  </label>
+
+                  {/* Volume Control */}
+                  <div>
+                    <label className="label">Volume</label>
+                    <div className="flex items-center gap-4">
+                      <SpeakerWaveIcon className="h-5 w-5 text-gray-400" />
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={preferences?.notificationVolume ?? 80}
+                        onChange={(e) => {
+                          const volume = parseInt(e.target.value);
+                          notificationSound.setVolume(volume);
+                        }}
+                        onMouseUp={(e) => handleVolumeChange(parseInt(e.target.value))}
+                        onTouchEnd={(e) => handleVolumeChange(parseInt(e.target.value))}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                      />
+                      <span className="text-sm font-medium text-gray-600 w-10">
+                        {preferences?.notificationVolume ?? 80}%
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => previewSound(preferences?.notificationSound || 'default')}
+                      className="mt-3 btn-secondary text-sm"
+                    >
+                      <PlayIcon className="h-4 w-4 mr-2" />
+                      Test Sound
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quiet Hours */}
+              <div className="card">
+                <h2 className="card-title mb-6">Quiet Hours</h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Enable Quiet Hours</p>
+                      <p className="text-sm text-gray-500">Mute notifications during specified hours</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={preferences?.quietHoursEnabled ?? false}
+                        onChange={(e) => handlePreferenceChange('quietHoursEnabled', e.target.checked)}
+                        disabled={savingPreferences}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </label>
+                  </div>
+
+                  {preferences?.quietHoursEnabled && (
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div>
+                        <label className="label">Start Time</label>
+                        <input
+                          type="time"
+                          value={preferences?.quietHoursStart || '22:00'}
+                          onChange={(e) => handlePreferenceChange('quietHoursStart', e.target.value)}
+                          className="input"
+                        />
+                      </div>
+                      <div>
+                        <label className="label">End Time</label>
+                        <input
+                          type="time"
+                          value={preferences?.quietHoursEnd || '08:00'}
+                          onChange={(e) => handlePreferenceChange('quietHoursEnd', e.target.value)}
+                          className="input"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

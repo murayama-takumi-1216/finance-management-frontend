@@ -63,12 +63,15 @@ function Calendar() {
   const [selectedReminderSound, setSelectedReminderSound] = useState('default');
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm();
-  const { register: registerReminder, handleSubmit: handleReminderSubmit, reset: resetReminder, formState: { errors: reminderErrors, isSubmitting: isReminderSubmitting } } = useForm({
+  const { register: registerReminder, handleSubmit: handleReminderSubmit, reset: resetReminder, watch: watchReminder, formState: { errors: reminderErrors, isSubmitting: isReminderSubmitting } } = useForm({
     defaultValues: {
       mensaje: '',
       minutos_antes: '15',
     },
   });
+
+  // Watch the minutos_antes value for debugging
+  const watchedMinutosAntes = watchReminder('minutos_antes');
 
   useEffect(() => {
     const year = currentDate.getFullYear();
@@ -228,12 +231,38 @@ function Calendar() {
 
   const onSubmitReminder = async (data) => {
     try {
+      // Use watched value to ensure we get the current selection
+      const minutosAntesValue = parseInt(watchedMinutosAntes) || parseInt(data.minutos_antes) || 0;
+
+      // Format date preserving local timezone (avoid toISOString which converts to UTC)
+      const formatLocalDateTime = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
+
+      const localDateTimeStr = formatLocalDateTime(reminderDate);
+
+      console.log('Reminder Submit Debug:', {
+        formDataMinutosAntes: data.minutos_antes,
+        watchedMinutosAntes: watchedMinutosAntes,
+        parsedMinutosAntes: minutosAntesValue,
+        reminderDateLocal: localDateTimeStr,
+        reminderDateISO: reminderDate.toISOString(),
+      });
+
       const payload = {
-        ...data,
-        fecha_recordatorio: reminderDate.toISOString(),
-        minutos_antes: parseInt(data.minutos_antes),
+        mensaje: data.mensaje,
+        fecha_recordatorio: localDateTimeStr,
+        minutos_antes: minutosAntesValue,
         notification_sound: selectedReminderSound,
       };
+
+      console.log('Payload being sent:', payload);
 
       await createReminder(accountId, payload);
       toast.success('Reminder created');

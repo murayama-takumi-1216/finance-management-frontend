@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, Transition, Dialog } from '@headlessui/react';
 import {
   BellIcon,
   CheckIcon,
@@ -8,6 +8,7 @@ import {
   XMarkIcon,
   CalendarIcon,
   ClipboardDocumentListIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
 import { useNotificationsStore } from '../store/useStore';
@@ -27,6 +28,9 @@ function NotificationBell() {
   } = useNotificationsStore();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [notificationToDelete, setNotificationToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Initial fetch
   useEffect(() => {
@@ -79,13 +83,29 @@ function NotificationBell() {
     }
   };
 
-  const handleDelete = async (e, notificationId) => {
+  const handleDeleteClick = (e, notification) => {
     e.stopPropagation();
+    setNotificationToDelete(notification);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!notificationToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteNotification(notificationId);
+      await deleteNotification(notificationToDelete.id);
+      setShowDeleteModal(false);
+      setNotificationToDelete(null);
     } catch (error) {
       console.error('Failed to delete notification:', error);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setNotificationToDelete(null);
   };
 
   const getNotificationIcon = (tipo) => {
@@ -206,11 +226,11 @@ function NotificationBell() {
                             </button>
                           )}
                           <button
-                            onClick={(e) => handleDelete(e, notification.id)}
-                            className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
+                            onClick={(e) => handleDeleteClick(e, notification)}
+                            className="p-1.5 rounded-full hover:bg-red-100 transition-colors"
                             title="Delete"
                           >
-                            <XMarkIcon className="h-4 w-4 text-gray-500" />
+                            <TrashIcon className="h-4 w-4 text-red-500" />
                           </button>
                         </div>
                       </div>
@@ -238,6 +258,85 @@ function NotificationBell() {
             </div>
           )}
         </Menu.Items>
+      </Transition>
+
+      {/* Delete Confirmation Modal */}
+      <Transition appear show={showDeleteModal} as={Fragment}>
+        <Dialog as="div" className="relative z-[60]" onClose={handleCancelDelete}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                      <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
+                        Delete Notification
+                      </Dialog.Title>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Are you sure you want to delete this notification?
+                      </p>
+                    </div>
+                  </div>
+
+                  {notificationToDelete && (
+                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="font-medium text-gray-900 text-sm">
+                        {notificationToDelete.titulo}
+                      </p>
+                      {notificationToDelete.mensaje && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          {notificationToDelete.mensaje}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex gap-3 justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCancelDelete}
+                      className="btn-secondary"
+                      disabled={isDeleting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmDelete}
+                      className="btn-danger"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
       </Transition>
     </Menu>
   );

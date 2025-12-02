@@ -10,6 +10,8 @@ export function useNotifications() {
     preferences,
     fetchPreferences,
     fetchUnreadCount,
+    fetchCustomSounds,
+    getCustomSoundUrl,
     addNotification,
     unreadCount,
   } = useNotificationsStore();
@@ -17,10 +19,11 @@ export function useNotifications() {
   const previousCountRef = useRef(unreadCount);
   const permissionGrantedRef = useRef(false);
 
-  // Load preferences on mount
+  // Load preferences and custom sounds on mount
   useEffect(() => {
     fetchPreferences().catch(console.error);
-  }, [fetchPreferences]);
+    fetchCustomSounds().catch(console.error);
+  }, [fetchPreferences, fetchCustomSounds]);
 
   // Request browser notification permission
   useEffect(() => {
@@ -69,8 +72,10 @@ export function useNotifications() {
     if (!preferences?.notificationsEnabled || isQuietHours()) return;
 
     const soundId = preferences?.notificationSound || 'default';
-    notificationSound.play(soundId);
-  }, [preferences, isQuietHours]);
+    // Get custom sound URL if it's a custom sound
+    const customUrl = soundId.startsWith('custom_') ? getCustomSoundUrl(soundId) : null;
+    notificationSound.play(soundId, customUrl);
+  }, [preferences, isQuietHours, getCustomSoundUrl]);
 
   // Show browser notification
   const showBrowserNotification = useCallback((title, options = {}) => {

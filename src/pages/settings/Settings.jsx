@@ -14,6 +14,7 @@ import {
   ArrowUpTrayIcon,
   TrashIcon,
   MusicalNoteIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useNotificationsStore } from '../../store/useStore';
 import { usersAPI, integrationsAPI, preferencesAPI } from '../../services/api';
@@ -44,6 +45,9 @@ function Settings() {
   const [customSounds, setCustomSounds] = useState([]);
   const [uploadingSound, setUploadingSound] = useState(false);
   const fileInputRef = useState(null);
+  const [showDeleteSoundModal, setShowDeleteSoundModal] = useState(false);
+  const [soundToDelete, setSoundToDelete] = useState(null);
+  const [isDeletingSound, setIsDeletingSound] = useState(false);
 
   // Fetch custom sounds
   const fetchCustomSounds = async () => {
@@ -118,7 +122,9 @@ function Settings() {
   const previewSound = (soundId) => {
     // Find the sound URL if it's a custom sound
     const customSound = customSounds.find(s => s.id === soundId);
-    const customUrl = customSound ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}${customSound.url}` : null;
+    // Custom sounds URL should use base URL without /api suffix
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
+    const customUrl = customSound ? `${baseUrl}${customSound.url}` : null;
     notificationSound.preview(soundId, localPreferences.notificationVolume, customUrl);
   };
 
@@ -163,23 +169,42 @@ function Settings() {
     }
   };
 
-  // Handle custom sound deletion
-  const handleDeleteSound = async (soundId) => {
-    const numericId = soundId.replace('custom_', '');
+  // Handle custom sound deletion - show modal
+  const handleDeleteSoundClick = (sound) => {
+    setSoundToDelete(sound);
+    setShowDeleteSoundModal(true);
+  };
+
+  // Confirm delete sound
+  const handleConfirmDeleteSound = async () => {
+    if (!soundToDelete) return;
+
+    const numericId = soundToDelete.id.replace('custom_', '');
+    setIsDeletingSound(true);
     try {
       await preferencesAPI.deleteSound(numericId);
       toast.success('Sound deleted');
 
       // If this was the selected sound, switch to default
-      if (localPreferences.notificationSound === soundId) {
+      if (localPreferences.notificationSound === soundToDelete.id) {
         handleLocalPreferenceChange('notificationSound', 'default');
       }
 
       // Refresh custom sounds list
       await fetchCustomSounds();
+      setShowDeleteSoundModal(false);
+      setSoundToDelete(null);
     } catch (error) {
       toast.error('Failed to delete sound');
+    } finally {
+      setIsDeletingSound(false);
     }
+  };
+
+  // Cancel delete sound
+  const handleCancelDeleteSound = () => {
+    setShowDeleteSoundModal(false);
+    setSoundToDelete(null);
   };
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
@@ -525,7 +550,7 @@ function Settings() {
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDeleteSound(sound.id);
+                                  handleDeleteSoundClick(sound);
                                 }}
                                 className="p-1.5 rounded-full hover:bg-red-100 transition-colors"
                                 title="Delete sound"
@@ -898,6 +923,88 @@ function Settings() {
                   <div className="mt-6 pt-4 border-t">
                     <button onClick={() => setShowCalendarModal(false)} className="w-full btn-secondary">
                       Cancel
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Delete Sound Confirmation Modal */}
+      <Transition appear show={showDeleteSoundModal} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={handleCancelDeleteSound}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                      <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
+                        Delete Sound
+                      </Dialog.Title>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Are you sure you want to delete this custom sound?
+                      </p>
+                    </div>
+                  </div>
+
+                  {soundToDelete && (
+                    <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center gap-3">
+                      <MusicalNoteIcon className="h-5 w-5 text-primary-500 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {soundToDelete.name}
+                        </p>
+                        {soundToDelete.filename && (
+                          <p className="text-sm text-gray-500">
+                            {soundToDelete.filename}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex gap-3 justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCancelDeleteSound}
+                      className="btn-secondary"
+                      disabled={isDeletingSound}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmDeleteSound}
+                      className="btn-danger"
+                      disabled={isDeletingSound}
+                    >
+                      {isDeletingSound ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </Dialog.Panel>

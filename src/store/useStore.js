@@ -613,6 +613,7 @@ export const useNotificationsStore = create((set, get) => ({
   isLoading: false,
   preferences: null,
   availableSounds: [],
+  customSounds: [],
 
   fetchNotifications: async (params = {}) => {
     set({ isLoading: true });
@@ -720,5 +721,26 @@ export const useNotificationsStore = create((set, get) => ({
     } catch (error) {
       throw error;
     }
+  },
+
+  fetchCustomSounds: async () => {
+    try {
+      const { data } = await preferencesAPI.getSounds();
+      set({ customSounds: data.custom || [] });
+      return data.custom || [];
+    } catch (error) {
+      console.error('Failed to fetch custom sounds:', error);
+      return [];
+    }
+  },
+
+  // Get custom sound URL by sound ID
+  getCustomSoundUrl: (soundId) => {
+    const customSounds = get().customSounds;
+    const sound = customSounds.find(s => s.id === soundId);
+    if (!sound) return null;
+    // Build base URL without /api suffix
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
+    return `${baseUrl}${sound.url}`;
   },
 }));

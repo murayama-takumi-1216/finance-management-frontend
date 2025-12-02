@@ -15,8 +15,11 @@ import {
   ArrowPathIcon,
   TrashIcon,
   PencilIcon,
+  SpeakerWaveIcon,
+  PlayIcon,
 } from '@heroicons/react/24/outline';
-import { useEventsStore, useCategoriesStore } from '../../store/useStore';
+import { useEventsStore, useCategoriesStore, useNotificationsStore } from '../../store/useStore';
+import notificationSound, { NOTIFICATION_SOUNDS } from '../../utils/notificationSound';
 
 const eventTypeOptions = [
   { value: 'pago_unico', label: 'One-time Payment' },
@@ -33,18 +36,19 @@ const recurrenceOptions = [
 ];
 
 const reminderOptions = [
-  { value: 0, label: 'At time of event' },
-  { value: 15, label: '15 minutes before' },
-  { value: 30, label: '30 minutes before' },
-  { value: 60, label: '1 hour before' },
-  { value: 1440, label: '1 day before' },
-  { value: 10080, label: '1 week before' },
+  { value: '0', label: 'At time of event' },
+  { value: '15', label: '15 minutes before' },
+  { value: '30', label: '30 minutes before' },
+  { value: '60', label: '1 hour before' },
+  { value: '1440', label: '1 day before' },
+  { value: '10080', label: '1 week before' },
 ];
 
 function Calendar() {
   const { accountId } = useParams();
   const { events, reminders, fetchEvents, fetchReminders, createEvent, updateEvent, deleteEvent, createReminder, deleteReminder, isLoading } = useEventsStore();
   const { categories, fetchCategories } = useCategoriesStore();
+  const { customSounds, fetchCustomSounds, getCustomSoundUrl } = useNotificationsStore();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -56,9 +60,15 @@ function Calendar() {
   const [reminderDate, setReminderDate] = useState(new Date());
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [viewMode, setViewMode] = useState('month');
+  const [selectedReminderSound, setSelectedReminderSound] = useState('default');
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm();
-  const { register: registerReminder, handleSubmit: handleReminderSubmit, reset: resetReminder, formState: { errors: reminderErrors, isSubmitting: isReminderSubmitting } } = useForm();
+  const { register: registerReminder, handleSubmit: handleReminderSubmit, reset: resetReminder, formState: { errors: reminderErrors, isSubmitting: isReminderSubmitting } } = useForm({
+    defaultValues: {
+      mensaje: '',
+      minutos_antes: '15',
+    },
+  });
 
   useEffect(() => {
     const year = currentDate.getFullYear();
@@ -72,6 +82,11 @@ function Calendar() {
       fetchCategories(accountId);
     }
   }, [accountId, currentDate, fetchEvents, fetchReminders, fetchCategories]);
+
+  // Fetch custom sounds for reminder modal
+  useEffect(() => {
+    fetchCustomSounds().catch(console.error);
+  }, [fetchCustomSounds]);
 
   const getDaysInMonth = () => {
     const year = currentDate.getFullYear();
@@ -174,8 +189,15 @@ function Calendar() {
 
   const openReminderModal = () => {
     setReminderDate(new Date());
-    resetReminder({ mensaje: '', minutos_antes: 60 });
+    resetReminder({ mensaje: '', minutos_antes: '15' });
+    setSelectedReminderSound('default');
     setShowReminderModal(true);
+  };
+
+  // Preview reminder sound
+  const previewReminderSound = (soundId) => {
+    const customUrl = soundId.startsWith('custom_') ? getCustomSoundUrl(soundId) : null;
+    notificationSound.preview(soundId, 80, customUrl);
   };
 
   const onSubmitEvent = async (data) => {
@@ -210,6 +232,7 @@ function Calendar() {
         ...data,
         fecha_recordatorio: reminderDate.toISOString(),
         minutos_antes: parseInt(data.minutos_antes),
+        notification_sound: selectedReminderSound,
       };
 
       await createReminder(accountId, payload);
@@ -779,6 +802,80 @@ function Calendar() {
                           <option key={r.value} value={r.value}>{r.label}</option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Notification Sound Selection */}
+                    <div>
+                      <label className="label flex items-center gap-2">
+                        <SpeakerWaveIcon className="h-4 w-4" />
+                        Notification Sound
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+                        {/* Built-in sounds */}
+                        {NOTIFICATION_SOUNDS.map((sound) => (
+                          <div
+                            key={sound.id}
+                            className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all ${
+                              selectedReminderSound === sound.id
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => setSelectedReminderSound(sound.id)}
+                          >
+                            <span className={`text-sm font-medium truncate ${
+                              selectedReminderSound === sound.id
+                                ? 'text-primary-700'
+                                : 'text-gray-700'
+                            }`}>
+                              {sound.name}
+                            </span>
+                            {sound.id !== 'none' && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  previewReminderSound(sound.id);
+                                }}
+                                className="p-1 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0"
+                                title="Preview sound"
+                              >
+                                <PlayIcon className="h-3 w-3 text-gray-600" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        {/* Custom sounds */}
+                        {customSounds.map((sound) => (
+                          <div
+                            key={sound.id}
+                            className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all ${
+                              selectedReminderSound === sound.id
+                                ? 'border-primary-500 bg-primary-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => setSelectedReminderSound(sound.id)}
+                          >
+                            <span className={`text-sm font-medium truncate ${
+                              selectedReminderSound === sound.id
+                                ? 'text-primary-700'
+                                : 'text-gray-700'
+                            }`}>
+                              {sound.name}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                previewReminderSound(sound.id);
+                              }}
+                              className="p-1 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0"
+                              title="Preview sound"
+                            >
+                              <PlayIcon className="h-3 w-3 text-gray-600" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="flex gap-3 pt-4">

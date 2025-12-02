@@ -25,6 +25,14 @@ function Settings() {
   const [integrations, setIntegrations] = useState([]);
   const [loadingIntegrations, setLoadingIntegrations] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
+  const [localVolume, setLocalVolume] = useState(80);
+
+  // Sync local volume with preferences
+  useEffect(() => {
+    if (preferences?.notificationVolume !== undefined) {
+      setLocalVolume(preferences.notificationVolume);
+    }
+  }, [preferences?.notificationVolume]);
 
   // Load preferences when notifications tab is active
   useEffect(() => {
@@ -63,7 +71,7 @@ function Settings() {
   };
 
   const previewSound = (soundId) => {
-    notificationSound.preview(soundId, preferences?.notificationVolume || 80);
+    notificationSound.preview(soundId, localVolume);
   };
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
@@ -367,9 +375,10 @@ function Settings() {
                         type="range"
                         min="0"
                         max="100"
-                        value={preferences?.notificationVolume ?? 80}
+                        value={localVolume}
                         onChange={(e) => {
                           const volume = parseInt(e.target.value);
+                          setLocalVolume(volume);
                           notificationSound.setVolume(volume);
                         }}
                         onMouseUp={(e) => handleVolumeChange(parseInt(e.target.value))}
@@ -377,7 +386,7 @@ function Settings() {
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                       />
                       <span className="text-sm font-medium text-gray-600 w-10">
-                        {preferences?.notificationVolume ?? 80}%
+                        {localVolume}%
                       </span>
                     </div>
                     <button

@@ -190,7 +190,7 @@ export const useAccountsStore = create((set, get) => ({
             ? { ...get().currentAccount, ...data.account }
             : get().currentAccount,
       });
-      return data.account;
+      return data; // Return full response including currencyConverted flag
     } catch (error) {
       throw error;
     }

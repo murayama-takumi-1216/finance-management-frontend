@@ -156,31 +156,31 @@ function Tasks() {
   const TaskCard = ({ task }) => (
     <div className={`p-4 bg-white rounded-lg border ${isOverdue(task) ? 'border-danger-300 bg-danger-50' : 'border-gray-200'} group overflow-visible`}>
       <div className="flex items-start gap-3">
-        <button
-          onClick={() => toggleComplete(task)}
-          className={`mt-0.5 flex-shrink-0 transition-colors ${
-            task.estado === 'completada'
-              ? 'text-success-500'
-              : task.estado === 'en_progreso'
+        {task.estado === 'completada' ? (
+          <div className="mt-0.5 flex-shrink-0 text-success-500">
+            <CheckCircleSolidIcon className="h-6 w-6" />
+          </div>
+        ) : (
+          <button
+            onClick={() => toggleComplete(task)}
+            className={`mt-0.5 flex-shrink-0 transition-colors ${
+              task.estado === 'en_progreso'
                 ? 'text-primary-500 hover:text-success-500'
                 : 'text-gray-300 hover:text-primary-500'
-          }`}
-          title={
-            task.estado === 'pendiente'
-              ? 'Click to start (In Progress)'
-              : task.estado === 'en_progreso'
-                ? 'Click to complete'
-                : 'Click to reopen'
-          }
-        >
-          {task.estado === 'completada' ? (
-            <CheckCircleSolidIcon className="h-6 w-6" />
-          ) : task.estado === 'en_progreso' ? (
-            <ClockIcon className="h-6 w-6" />
-          ) : (
-            <CheckCircleIcon className="h-6 w-6" />
-          )}
-        </button>
+            }`}
+            title={
+              task.estado === 'pendiente'
+                ? 'Click to start (In Progress)'
+                : 'Click to complete'
+            }
+          >
+            {task.estado === 'en_progreso' ? (
+              <ClockIcon className="h-6 w-6" />
+            ) : (
+              <CheckCircleIcon className="h-6 w-6" />
+            )}
+          </button>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h4 className={`font-medium ${task.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-900'}`}>

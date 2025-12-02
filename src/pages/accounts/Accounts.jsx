@@ -82,8 +82,28 @@ function Accounts() {
   const onSubmit = async (data) => {
     try {
       if (editingAccount) {
-        await updateAccount(editingAccount.id, data);
-        toast.success('Account updated successfully');
+        // Check if currency is changing
+        const currencyChanging = data.moneda !== editingAccount.moneda;
+
+        if (currencyChanging) {
+          const confirmed = window.confirm(
+            `You are changing the currency from ${editingAccount.moneda} to ${data.moneda}.\n\n` +
+            `All transaction amounts will be automatically converted to the new currency.\n\n` +
+            `Do you want to continue?`
+          );
+
+          if (!confirmed) {
+            return;
+          }
+        }
+
+        const response = await updateAccount(editingAccount.id, data);
+
+        if (response?.currencyConverted) {
+          toast.success(`Account updated and amounts converted to ${data.moneda}`);
+        } else {
+          toast.success('Account updated successfully');
+        }
       } else {
         await createAccount(data);
         toast.success('Account created successfully');
@@ -149,8 +169,8 @@ function Accounts() {
             >
               {/* Actions Menu */}
               <Menu as="div" className="absolute top-4 right-4">
-                <Menu.Button className="p-1 rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <EllipsisVerticalIcon className="h-5 w-5 text-gray-400" />
+                <Menu.Button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                 </Menu.Button>
                 <Transition
                   as={Fragment}
@@ -319,7 +339,6 @@ function Accounts() {
                         id="moneda"
                         className="input"
                         {...register('moneda')}
-                        disabled={!!editingAccount}
                       >
                         {currencies.map((currency) => (
                           <option key={currency.value} value={currency.value}>
@@ -327,11 +346,6 @@ function Accounts() {
                           </option>
                         ))}
                       </select>
-                      {editingAccount && (
-                        <p className="mt-1 text-xs text-gray-500">
-                          Currency cannot be changed after account creation
-                        </p>
-                      )}
                     </div>
 
                     <div className="flex gap-3 pt-4">

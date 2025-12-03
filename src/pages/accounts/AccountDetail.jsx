@@ -13,9 +13,29 @@ import {
   UserMinusIcon,
   ChartBarIcon,
   XMarkIcon,
+  ArrowsRightLeftIcon,
+  TagIcon,
+  CalendarDaysIcon,
+  WalletIcon,
+  BuildingStorefrontIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 import { useAccountsStore } from '../../store/useStore';
 import { accountsAPI, reportsAPI } from '../../services/api';
+
+const accountTypeIcons = {
+  personal: WalletIcon,
+  negocio: BuildingStorefrontIcon,
+  ahorro: BanknotesIcon,
+  compartida: UsersIcon,
+};
+
+const accountTypeColors = {
+  personal: 'from-blue-500 to-blue-600',
+  negocio: 'from-purple-500 to-purple-600',
+  ahorro: 'from-emerald-500 to-emerald-600',
+  compartida: 'from-amber-500 to-amber-600',
+};
 
 function AccountDetail() {
   const { accountId } = useParams();
@@ -84,90 +104,99 @@ function AccountDetail() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="card animate-pulse">
-              <div className="h-20 bg-gray-200 rounded" />
-            </div>
+        <div className="skeleton h-32 rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton h-28 rounded-2xl" />
           ))}
         </div>
+        <div className="skeleton h-48 rounded-2xl" />
       </div>
     );
   }
 
   if (!currentAccount) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Account not found</p>
+      <div className="card">
+        <div className="empty-state">
+          <div className="empty-state-icon">
+            <WalletIcon className="h-10 w-10 text-gray-400" />
+          </div>
+          <h3 className="empty-state-title">Account not found</h3>
+          <p className="empty-state-description">
+            The account you're looking for doesn't exist or you don't have access to it.
+          </p>
+          <Link to="/accounts" className="btn-primary">
+            Back to Accounts
+          </Link>
+        </div>
       </div>
     );
   }
 
   const isOwner = currentAccount.rol === 'propietario';
+  const AccountIcon = accountTypeIcons[currentAccount.tipo] || WalletIcon;
+  const accountColor = accountTypeColors[currentAccount.tipo] || 'from-indigo-500 to-indigo-600';
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{currentAccount.nombre}</h1>
-          <p className="text-gray-500 mt-1">
-            {currentAccount.tipo} account ({currentAccount.moneda})
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            to={`/accounts/${accountId}/movements`}
-            className="btn-secondary"
-          >
-            <DocumentChartBarIcon className="h-5 w-5 mr-2" />
-            View Movements
-          </Link>
-          <Link
-            to={`/accounts/${accountId}/reports`}
-            className="btn-primary"
-          >
-            <ChartBarIcon className="h-5 w-5 mr-2" />
-            Reports
-          </Link>
-        </div>
-      </div>
+    <div className="space-y-8">
+      {/* Header Card */}
+      <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${accountColor} p-6 sm:p-8 shadow-xl`}>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="stat-card">
-          <div className="stat-icon bg-primary-100">
-            <BanknotesIcon className="h-6 w-6 text-primary-600" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+              <AccountIcon className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">{currentAccount.nombre}</h1>
+              <p className="text-white/80 mt-1 flex items-center gap-2">
+                <span className="capitalize">{currentAccount.tipo}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                <span>{currentAccount.moneda}</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="stat-label">Total Balance</p>
-            <p className="stat-value">
-              {formatCurrency(currentAccount.balance?.saldo || 0)}
-            </p>
+
+          <div className="flex gap-3">
+            <Link
+              to={`/accounts/${accountId}/movements`}
+              className="btn bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 px-4 py-2.5"
+            >
+              <ArrowsRightLeftIcon className="h-5 w-5" />
+              <span className="hidden sm:inline">Movements</span>
+            </Link>
+            <Link
+              to={`/accounts/${accountId}/reports`}
+              className="btn bg-white text-gray-900 hover:bg-gray-100 px-4 py-2.5 shadow-lg"
+            >
+              <ChartBarIcon className="h-5 w-5" />
+              <span className="hidden sm:inline">Reports</span>
+            </Link>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon bg-success-50">
-            <ArrowTrendingUpIcon className="h-6 w-6 text-success-600" />
-          </div>
-          <div>
-            <p className="stat-label">Total Income</p>
-            <p className="stat-value text-success-600">
+        {/* Balance Overview in Header */}
+        <div className="relative mt-8 grid grid-cols-3 gap-4 sm:gap-8">
+          <div className="text-center sm:text-left">
+            <p className="text-white/70 text-sm font-medium">Total Income</p>
+            <p className="text-xl sm:text-2xl font-bold text-white mt-1">
               {formatCurrency(currentAccount.balance?.totalIngresos || 0)}
             </p>
           </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon bg-danger-50">
-            <ArrowTrendingDownIcon className="h-6 w-6 text-danger-600" />
-          </div>
-          <div>
-            <p className="stat-label">Total Expenses</p>
-            <p className="stat-value text-danger-600">
+          <div className="text-center">
+            <p className="text-white/70 text-sm font-medium">Total Expenses</p>
+            <p className="text-xl sm:text-2xl font-bold text-white mt-1">
               {formatCurrency(currentAccount.balance?.totalGastos || 0)}
+            </p>
+          </div>
+          <div className="text-center sm:text-right">
+            <p className="text-white/70 text-sm font-medium">Current Balance</p>
+            <p className="text-xl sm:text-2xl font-bold text-white mt-1">
+              {formatCurrency(currentAccount.balance?.saldo || 0)}
             </p>
           </div>
         </div>
@@ -175,32 +204,64 @@ function AccountDetail() {
 
       {/* Monthly Summary */}
       {dashboardData && (
-        <div className="card">
-          <h3 className="card-title mb-4">This Month</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="card card-body">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <CalendarDaysIcon className="h-5 w-5 text-indigo-600" />
+            </div>
             <div>
-              <p className="text-sm text-gray-500">Income</p>
-              <p className="text-xl font-bold text-success-600">
+              <h2 className="card-title mb-0">This Month</h2>
+              <p className="card-subtitle">Current month overview</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+              <div className="flex items-center gap-2 mb-2">
+                <ArrowTrendingUpIcon className="h-4 w-4 text-emerald-600" />
+                <p className="text-sm font-medium text-emerald-700">Income</p>
+              </div>
+              <p className="text-2xl font-bold text-emerald-600">
                 {formatCurrency(dashboardData.mesActual.ingresos)}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Expenses</p>
-              <p className="text-xl font-bold text-danger-600">
+
+            <div className="p-4 bg-red-50 rounded-xl border border-red-100">
+              <div className="flex items-center gap-2 mb-2">
+                <ArrowTrendingDownIcon className="h-4 w-4 text-red-600" />
+                <p className="text-sm font-medium text-red-700">Expenses</p>
+              </div>
+              <p className="text-2xl font-bold text-red-600">
                 {formatCurrency(dashboardData.mesActual.gastos)}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Balance</p>
-              <p className={`text-xl font-bold ${
-                dashboardData.mesActual.balance >= 0 ? 'text-success-600' : 'text-danger-600'
+
+            <div className={`p-4 rounded-xl border ${
+              dashboardData.mesActual.balance >= 0
+                ? 'bg-blue-50 border-blue-100'
+                : 'bg-orange-50 border-orange-100'
+            }`}>
+              <div className="flex items-center gap-2 mb-2">
+                <BanknotesIcon className={`h-4 w-4 ${
+                  dashboardData.mesActual.balance >= 0 ? 'text-blue-600' : 'text-orange-600'
+                }`} />
+                <p className={`text-sm font-medium ${
+                  dashboardData.mesActual.balance >= 0 ? 'text-blue-700' : 'text-orange-700'
+                }`}>Balance</p>
+              </div>
+              <p className={`text-2xl font-bold ${
+                dashboardData.mesActual.balance >= 0 ? 'text-blue-600' : 'text-orange-600'
               }`}>
                 {formatCurrency(dashboardData.mesActual.balance)}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Transactions</p>
-              <p className="text-xl font-bold text-gray-900">
+
+            <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <div className="flex items-center gap-2 mb-2">
+                <DocumentChartBarIcon className="h-4 w-4 text-purple-600" />
+                <p className="text-sm font-medium text-purple-700">Transactions</p>
+              </div>
+              <p className="text-2xl font-bold text-purple-600">
                 {dashboardData.mesActual.numMovimientos}
               </p>
             </div>
@@ -210,14 +271,22 @@ function AccountDetail() {
 
       {/* Account Members */}
       <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">Account Members</h3>
+        <div className="card-header px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <UsersIcon className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <h2 className="card-title mb-0">Account Members</h2>
+              <p className="card-subtitle">{currentAccount.miembros?.length || 0} members</p>
+            </div>
+          </div>
           {isOwner && (
             <button
               onClick={() => setShowInviteModal(true)}
-              className="btn-secondary text-sm"
+              className="btn-primary"
             >
-              <UserPlusIcon className="h-4 w-4 mr-2" />
+              <UserPlusIcon className="h-5 w-5" />
               Invite Member
             </button>
           )}
@@ -227,16 +296,16 @@ function AccountDetail() {
           {currentAccount.miembros?.map((member) => (
             <div
               key={member.id}
-              className="py-3 flex items-center justify-between"
+              className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                  <span className="text-primary-600 font-medium">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${accountColor} flex items-center justify-center shadow-sm`}>
+                  <span className="text-white font-semibold text-lg">
                     {member.nombre?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{member.nombre}</p>
+                  <p className="font-semibold text-gray-900">{member.nombre}</p>
                   <p className="text-sm text-gray-500">{member.email}</p>
                 </div>
               </div>
@@ -247,14 +316,14 @@ function AccountDetail() {
                     <select
                       value={member.rol}
                       onChange={(e) => handleUpdateRole(member.id, e.target.value)}
-                      className="input text-sm py-1 w-32"
+                      className="select text-sm py-2 w-36"
                     >
                       <option value="editor">Editor</option>
                       <option value="solo_lectura">Read Only</option>
                     </select>
                     <button
                       onClick={() => handleRemoveMember(member.id, member.nombre)}
-                      className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                      className="btn-icon-sm text-red-600 hover:bg-red-50"
                       title="Remove member"
                     >
                       <UserMinusIcon className="h-5 w-5" />
@@ -262,12 +331,12 @@ function AccountDetail() {
                   </>
                 ) : (
                   <span
-                    className={`badge ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
                       member.rol === 'propietario'
-                        ? 'badge-primary'
+                        ? 'bg-indigo-100 text-indigo-700'
                         : member.rol === 'editor'
-                        ? 'badge-success'
-                        : 'badge-gray'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     {member.rol === 'propietario'
@@ -284,30 +353,44 @@ function AccountDetail() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link
           to={`/accounts/${accountId}/movements`}
-          className="card hover:shadow-md transition-shadow text-center py-8"
+          className="card card-hover p-6 group"
         >
-          <DocumentChartBarIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-          <p className="font-medium text-gray-900">Movements</p>
-          <p className="text-sm text-gray-500">View all transactions</p>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 mb-4 group-hover:scale-110 transition-transform">
+              <ArrowsRightLeftIcon className="h-7 w-7 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900 text-lg">Movements</h3>
+            <p className="text-sm text-gray-500 mt-1">View all transactions</p>
+          </div>
         </Link>
+
         <Link
           to={`/accounts/${accountId}/categories`}
-          className="card hover:shadow-md transition-shadow text-center py-8"
+          className="card card-hover p-6 group"
         >
-          <DocumentChartBarIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-          <p className="font-medium text-gray-900">Categories</p>
-          <p className="text-sm text-gray-500">Manage categories</p>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25 mb-4 group-hover:scale-110 transition-transform">
+              <TagIcon className="h-7 w-7 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900 text-lg">Categories</h3>
+            <p className="text-sm text-gray-500 mt-1">Manage categories</p>
+          </div>
         </Link>
+
         <Link
           to={`/accounts/${accountId}/reports`}
-          className="card hover:shadow-md transition-shadow text-center py-8"
+          className="card card-hover p-6 group"
         >
-          <ChartBarIcon className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-          <p className="font-medium text-gray-900">Reports</p>
-          <p className="text-sm text-gray-500">View analytics</p>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-4 group-hover:scale-110 transition-transform">
+              <ChartBarIcon className="h-7 w-7 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900 text-lg">Reports</h3>
+            <p className="text-sm text-gray-500 mt-1">View analytics</p>
+          </div>
         </Link>
       </div>
 
@@ -327,10 +410,10 @@ function AccountDetail() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="modal-overlay" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="modal-container">
             <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
@@ -341,66 +424,75 @@ function AccountDetail() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                  <div className="flex items-center justify-between mb-6">
-                    <Dialog.Title className="text-lg font-semibold text-gray-900">
+                <Dialog.Panel className="modal-panel">
+                  <div className="modal-header">
+                    <Dialog.Title className="modal-title">
                       Invite Member
                     </Dialog.Title>
                     <button
                       onClick={() => setShowInviteModal(false)}
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="btn-icon-sm hover:bg-gray-100"
                     >
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
                   </div>
 
-                  <form onSubmit={handleSubmit(onInviteSubmit)} className="space-y-4">
-                    <div>
-                      <label htmlFor="email" className="label">
-                        Email Address
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        className={`input ${errors.email ? 'input-error' : ''}`}
-                        placeholder="user@example.com"
-                        {...register('email', {
-                          required: 'Email is required',
-                          pattern: {
-                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                            message: 'Invalid email address',
-                          },
-                        })}
-                      />
-                      {errors.email && (
-                        <p className="mt-1 text-sm text-danger-600">{errors.email.message}</p>
-                      )}
+                  <form onSubmit={handleSubmit(onInviteSubmit)}>
+                    <div className="modal-body space-y-5">
+                      <div className="form-group">
+                        <label htmlFor="email" className="label">
+                          Email Address
+                        </label>
+                        <input
+                          id="email"
+                          type="email"
+                          className={`input ${errors.email ? 'input-error' : ''}`}
+                          placeholder="user@example.com"
+                          {...register('email', {
+                            required: 'Email is required',
+                            pattern: {
+                              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                              message: 'Invalid email address',
+                            },
+                          })}
+                        />
+                        {errors.email && (
+                          <p className="error-text">{errors.email.message}</p>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="rol" className="label">
+                          Role
+                        </label>
+                        <select id="rol" className="select" {...register('rol_en_cuenta')}>
+                          <option value="editor">Editor - Can create and edit</option>
+                          <option value="solo_lectura">Read Only - Can only view</option>
+                        </select>
+                      </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="rol" className="label">
-                        Role
-                      </label>
-                      <select id="rol" className="input" {...register('rol_en_cuenta')}>
-                        <option value="editor">Editor - Can create and edit</option>
-                        <option value="solo_lectura">Read Only - Can only view</option>
-                      </select>
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
+                    <div className="modal-footer">
                       <button
                         type="button"
                         onClick={() => setShowInviteModal(false)}
-                        className="btn-secondary flex-1"
+                        className="btn-secondary"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="btn-primary flex-1"
+                        className="btn-primary"
                       >
-                        {isSubmitting ? 'Inviting...' : 'Send Invite'}
+                        {isSubmitting ? (
+                          <>
+                            <span className="spinner" />
+                            Inviting...
+                          </>
+                        ) : (
+                          'Send Invite'
+                        )}
                       </button>
                     </div>
                   </form>

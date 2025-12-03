@@ -21,6 +21,10 @@ import {
   ArrowTrendingDownIcon,
   BanknotesIcon,
   CalendarDaysIcon,
+  ChartBarIcon,
+  ChartPieIcon,
+  PresentationChartLineIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/react/24/outline';
 
 ChartJS.register(
@@ -42,6 +46,13 @@ const periodOptions = [
   { value: 'quarter', label: 'This Quarter' },
   { value: 'year', label: 'This Year' },
   { value: 'custom', label: 'Custom Range' },
+];
+
+const tabs = [
+  { id: 'overview', label: 'Overview', icon: ChartBarIcon },
+  { id: 'categories', label: 'Categories', icon: ChartPieIcon },
+  { id: 'trends', label: 'Trends', icon: PresentationChartLineIcon },
+  { id: 'providers', label: 'Providers', icon: BuildingStorefrontIcon },
 ];
 
 function Reports() {
@@ -132,9 +143,6 @@ function Reports() {
         reportsAPI.getSpendingByProvider(accountId, { start, end, limit: 10 }),
       ]);
 
-      // Handle wrapped responses from backend
-      // getTotals returns { totals: [...], agrupacion }
-      // But for simple date range queries, it may return direct totals
       const totalsData = totalsRes.data?.totals?.[0] || totalsRes.data;
       setTotals({
         ingresos: totalsData?.totalIngresos ?? totalsData?.ingresos ?? 0,
@@ -143,13 +151,9 @@ function Reports() {
         numMovimientos: totalsData?.numMovimientos ?? 0
       });
 
-      // getExpensesByCategory returns { categories: [...], totalGastos, periodo }
       setExpensesByCategory(expensesRes.data?.categories || expensesRes.data || []);
-
-      // getIncomeByCategory returns { categories: [...], totalIngresos, periodo }
       setIncomeByCategory(incomeRes.data?.categories || incomeRes.data || []);
 
-      // getMonthlyTrends returns { trends: [...], promedios, numMeses }
       const trendsData = trendsRes.data?.trends || trendsRes.data || [];
       setMonthlyTrends(trendsData.map(t => ({
         mes: t.periodo,
@@ -158,16 +162,10 @@ function Reports() {
         num_movimientos: t.numMovimientos
       })));
 
-      // getTopCategories returns { ranking: [...], tipo, periodo }
-      // Add tipo field from the API response type to each category
       const topCatData = topRes.data?.ranking || topRes.data || [];
       const topCatType = topRes.data?.tipo || 'gasto';
-      setTopCategories(topCatData.map(c => ({
-        ...c,
-        tipo: topCatType
-      })));
+      setTopCategories(topCatData.map(c => ({ ...c, tipo: topCatType })));
 
-      // comparePeriods returns { comparison: [...], resumen: { periodoA, periodoB, variacion } }
       const compData = comparisonRes.data;
       if (compData?.resumen) {
         setComparison({
@@ -181,7 +179,6 @@ function Reports() {
         setComparison(null);
       }
 
-      // getSpendingByProvider returns { providers: [...], periodo }
       const providersData = providerRes.data?.providers || providerRes.data || [];
       setSpendingByProvider(providersData.map(p => ({
         proveedor: p.proveedor,
@@ -197,10 +194,7 @@ function Reports() {
 
   const formatCurrency = (amount) => {
     const currency = currentAccount?.moneda || 'USD';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(amount || 0);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
   };
 
   const formatPercent = (value) => {
@@ -210,8 +204,8 @@ function Reports() {
   };
 
   const categoryColors = [
-    '#3B82F6', '#EF4444', '#22C55E', '#F59E0B', '#8B5CF6',
-    '#EC4899', '#06B6D4', '#F97316', '#6366F1', '#84CC16',
+    '#6366F1', '#EC4899', '#22C55E', '#F59E0B', '#3B82F6',
+    '#8B5CF6', '#06B6D4', '#F97316', '#EF4444', '#84CC16',
   ];
 
   const expenseChartData = {
@@ -220,6 +214,7 @@ function Reports() {
       data: expensesByCategory.map(c => parseFloat(c.total)),
       backgroundColor: categoryColors,
       borderWidth: 0,
+      cutout: '65%',
     }],
   };
 
@@ -229,6 +224,7 @@ function Reports() {
       data: incomeByCategory.map(c => parseFloat(c.total)),
       backgroundColor: categoryColors,
       borderWidth: 0,
+      cutout: '65%',
     }],
   };
 
@@ -242,6 +238,8 @@ function Reports() {
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         fill: true,
         tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#22C55E',
       },
       {
         label: 'Expenses',
@@ -250,6 +248,8 @@ function Reports() {
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
         fill: true,
         tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#EF4444',
       },
     ],
   };
@@ -259,8 +259,8 @@ function Reports() {
     datasets: [{
       label: 'Spending',
       data: spendingByProvider.map(p => parseFloat(p.total)),
-      backgroundColor: '#3B82F6',
-      borderRadius: 4,
+      backgroundColor: 'rgba(99, 102, 241, 0.8)',
+      borderRadius: 8,
     }],
   };
 
@@ -268,8 +268,11 @@ function Reports() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'bottom',
+      legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } },
+      tooltip: {
+        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        padding: 12,
+        cornerRadius: 8,
       },
     },
   };
@@ -277,47 +280,52 @@ function Reports() {
   const barOptions = {
     ...chartOptions,
     indexAxis: 'y',
-    plugins: {
-      ...chartOptions.plugins,
-      legend: { display: false },
+    plugins: { ...chartOptions.plugins, legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { display: false } },
     },
   };
 
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-gray-200 rounded w-1/4 animate-pulse" />
+        <div className="skeleton h-20 rounded-2xl" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="card animate-pulse">
-              <div className="h-20 bg-gray-200 rounded" />
-            </div>
-          ))}
+          {[1, 2, 3, 4].map(i => <div key={i} className="skeleton h-28 rounded-2xl" />)}
         </div>
+        <div className="skeleton h-96 rounded-2xl" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-500 mt-1">Financial analytics and insights</p>
+        <div className="page-header mb-0">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/25">
+              <ChartBarIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="page-title">Reports</h1>
+              <p className="page-subtitle">Financial analytics and insights</p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="input"
+            className="select"
           >
             {periodOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
           {period === 'custom' && (
-            <div className="flex gap-2">
+            <>
               <input
                 type="date"
                 value={customDates.start}
@@ -330,112 +338,121 @@ function Reports() {
                 onChange={(e) => setCustomDates(prev => ({ ...prev, end: e.target.value }))}
                 className="input"
               />
-            </div>
+            </>
           )}
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="stat-card">
-          <div className="stat-icon bg-primary-100">
-            <BanknotesIcon className="h-6 w-6 text-primary-600" />
-          </div>
-          <div>
-            <p className="stat-label">Net Balance</p>
-            <p className={`stat-value ${totals?.balance >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
-              {formatCurrency(totals?.balance)}
-            </p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon bg-success-50">
-            <ArrowTrendingUpIcon className="h-6 w-6 text-success-600" />
-          </div>
-          <div>
-            <p className="stat-label">Total Income</p>
-            <p className="stat-value text-success-600">{formatCurrency(totals?.ingresos)}</p>
-            {comparison && (
-              <p className={`text-xs mt-1 ${comparison.cambio_ingresos >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
-                {formatPercent(comparison.cambio_ingresos)} vs last period
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="card card-body">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <BanknotesIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Net Balance</p>
+              <p className={`text-2xl font-bold ${totals?.balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                {formatCurrency(totals?.balance)}
               </p>
-            )}
+            </div>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon bg-danger-50">
-            <ArrowTrendingDownIcon className="h-6 w-6 text-danger-600" />
-          </div>
-          <div>
-            <p className="stat-label">Total Expenses</p>
-            <p className="stat-value text-danger-600">{formatCurrency(totals?.gastos)}</p>
-            {comparison && (
-              <p className={`text-xs mt-1 ${comparison.cambio_gastos <= 0 ? 'text-success-600' : 'text-danger-600'}`}>
-                {formatPercent(comparison.cambio_gastos)} vs last period
-              </p>
-            )}
+        <div className="card card-body">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+              <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Total Income</p>
+              <p className="text-2xl font-bold text-emerald-600">{formatCurrency(totals?.ingresos)}</p>
+              {comparison && (
+                <p className={`text-xs mt-0.5 ${comparison.cambio_ingresos >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {formatPercent(comparison.cambio_ingresos)} vs last
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon bg-primary-100">
-            <CalendarDaysIcon className="h-6 w-6 text-primary-600" />
+        <div className="card card-body">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/25">
+              <ArrowTrendingDownIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Total Expenses</p>
+              <p className="text-2xl font-bold text-red-600">{formatCurrency(totals?.gastos)}</p>
+              {comparison && (
+                <p className={`text-xs mt-0.5 ${comparison.cambio_gastos <= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {formatPercent(comparison.cambio_gastos)} vs last
+                </p>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="stat-label">Transactions</p>
-            <p className="stat-value">{totals?.numMovimientos || 0}</p>
+        </div>
+
+        <div className="card card-body">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+              <CalendarDaysIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Transactions</p>
+              <p className="text-2xl font-bold text-gray-900">{totals?.numMovimientos || 0}</p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="flex gap-4">
-          {['overview', 'categories', 'trends', 'providers'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </nav>
+      <div className="card card-body p-2">
+        <div className="flex gap-2 overflow-x-auto">
+          {tabs.map(tab => {
+            const TabIcon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <TabIcon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card">
-            <h3 className="card-title mb-4">Monthly Trends</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">Monthly Trends</h3>
             <div className="h-80">
               <Line data={trendsChartData} options={chartOptions} />
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="card-title mb-4">Top Expense Categories</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">Top Expense Categories</h3>
             <div className="space-y-4">
               {topCategories.filter(c => c.tipo === 'gasto').slice(0, 5).map((cat, idx) => (
                 <div key={cat.categoria} className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: categoryColors[idx] }}
-                  />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: categoryColors[idx] }} />
                   <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">{cat.categoria}</span>
-                      <span className="text-sm text-gray-500">{formatCurrency(cat.total)}</span>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-sm font-medium text-gray-900">{cat.categoria}</span>
+                      <span className="text-sm font-semibold text-gray-900">{formatCurrency(cat.total)}</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
-                        className="h-2 rounded-full"
+                        className="h-2 rounded-full transition-all"
                         style={{
                           width: `${(parseFloat(cat.total) / parseFloat(topCategories[0]?.total || 1)) * 100}%`,
                           backgroundColor: categoryColors[idx],
@@ -446,42 +463,41 @@ function Reports() {
                 </div>
               ))}
               {topCategories.filter(c => c.tipo === 'gasto').length === 0 && (
-                <p className="text-gray-500 text-center py-8">No expense data for this period</p>
+                <div className="text-center py-8 text-gray-500">No expense data for this period</div>
               )}
             </div>
           </div>
 
-          {/* Period Comparison */}
           {comparison && (
-            <div className="card lg:col-span-2">
-              <h3 className="card-title mb-4">Period Comparison</h3>
+            <div className="card card-body lg:col-span-2">
+              <h3 className="card-title mb-6">Period Comparison</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-500 mb-2">Previous Period</p>
-                  <p className="text-xl font-bold text-gray-900">
+                <div className="text-center p-6 bg-gray-50 rounded-2xl">
+                  <p className="text-sm text-gray-500 mb-2 font-medium">Previous Period</p>
+                  <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(comparison.periodo2?.ingresos - comparison.periodo2?.gastos)}
                   </p>
-                  <div className="flex justify-center gap-4 mt-2 text-sm">
-                    <span className="text-success-600">+{formatCurrency(comparison.periodo2?.ingresos)}</span>
-                    <span className="text-danger-600">-{formatCurrency(comparison.periodo2?.gastos)}</span>
+                  <div className="flex justify-center gap-4 mt-3 text-sm">
+                    <span className="text-emerald-600">+{formatCurrency(comparison.periodo2?.ingresos)}</span>
+                    <span className="text-red-600">-{formatCurrency(comparison.periodo2?.gastos)}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-center">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-primary-600">
+                    <p className={`text-4xl font-bold ${comparison.cambio_balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                       {formatPercent(comparison.cambio_balance)}
                     </p>
-                    <p className="text-sm text-gray-500">Change</p>
+                    <p className="text-sm text-gray-500 mt-1">Change</p>
                   </div>
                 </div>
-                <div className="text-center p-4 bg-primary-50 rounded-lg">
-                  <p className="text-sm text-gray-500 mb-2">Current Period</p>
-                  <p className="text-xl font-bold text-gray-900">
+                <div className="text-center p-6 bg-indigo-50 rounded-2xl">
+                  <p className="text-sm text-gray-500 mb-2 font-medium">Current Period</p>
+                  <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(comparison.periodo1?.ingresos - comparison.periodo1?.gastos)}
                   </p>
-                  <div className="flex justify-center gap-4 mt-2 text-sm">
-                    <span className="text-success-600">+{formatCurrency(comparison.periodo1?.ingresos)}</span>
-                    <span className="text-danger-600">-{formatCurrency(comparison.periodo1?.gastos)}</span>
+                  <div className="flex justify-center gap-4 mt-3 text-sm">
+                    <span className="text-emerald-600">+{formatCurrency(comparison.periodo1?.ingresos)}</span>
+                    <span className="text-red-600">-{formatCurrency(comparison.periodo1?.gastos)}</span>
                   </div>
                 </div>
               </div>
@@ -493,8 +509,8 @@ function Reports() {
       {/* Categories Tab */}
       {activeTab === 'categories' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card">
-            <h3 className="card-title mb-4">Expenses by Category</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">Expenses by Category</h3>
             {expensesByCategory.length > 0 ? (
               <div className="h-80">
                 <Doughnut data={expenseChartData} options={chartOptions} />
@@ -506,8 +522,8 @@ function Reports() {
             )}
           </div>
 
-          <div className="card">
-            <h3 className="card-title mb-4">Income by Category</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">Income by Category</h3>
             {incomeByCategory.length > 0 ? (
               <div className="h-80">
                 <Doughnut data={incomeChartData} options={chartOptions} />
@@ -520,32 +536,34 @@ function Reports() {
           </div>
 
           <div className="card lg:col-span-2">
-            <h3 className="card-title mb-4">Category Details</h3>
+            <div className="card-header px-6 py-4 border-b border-gray-100">
+              <h3 className="card-title mb-0">Category Details</h3>
+            </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="table">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-gray-500">Category</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-500">Type</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Total</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Transactions</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Average</th>
+                  <tr>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th className="text-right">Total</th>
+                    <th className="text-right">Transactions</th>
+                    <th className="text-right">Average</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[...expensesByCategory, ...incomeByCategory].map(cat => (
-                    <tr key={`${cat.categoria}-${cat.tipo || 'expense'}`} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{cat.categoria}</td>
-                      <td className="py-3 px-4">
+                    <tr key={`${cat.categoria}-${cat.tipo || 'expense'}`}>
+                      <td className="font-medium">{cat.categoria}</td>
+                      <td>
                         <span className={`badge ${incomeByCategory.includes(cat) ? 'badge-success' : 'badge-danger'}`}>
                           {incomeByCategory.includes(cat) ? 'Income' : 'Expense'}
                         </span>
                       </td>
-                      <td className={`py-3 px-4 text-right font-medium ${incomeByCategory.includes(cat) ? 'text-success-600' : 'text-danger-600'}`}>
+                      <td className={`text-right font-semibold ${incomeByCategory.includes(cat) ? 'text-emerald-600' : 'text-red-600'}`}>
                         {formatCurrency(cat.total)}
                       </td>
-                      <td className="py-3 px-4 text-right text-gray-500">{cat.cantidad}</td>
-                      <td className="py-3 px-4 text-right text-gray-500">
+                      <td className="text-right text-gray-500">{cat.cantidad}</td>
+                      <td className="text-right text-gray-500">
                         {formatCurrency(parseFloat(cat.total) / (cat.cantidad || 1))}
                       </td>
                     </tr>
@@ -560,46 +578,40 @@ function Reports() {
       {/* Trends Tab */}
       {activeTab === 'trends' && (
         <div className="space-y-6">
-          <div className="card">
-            <h3 className="card-title mb-4">12-Month Income vs Expenses</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">12-Month Income vs Expenses</h3>
             <div className="h-96">
               <Line data={trendsChartData} options={chartOptions} />
             </div>
           </div>
 
           <div className="card">
-            <h3 className="card-title mb-4">Monthly Breakdown</h3>
+            <div className="card-header px-6 py-4 border-b border-gray-100">
+              <h3 className="card-title mb-0">Monthly Breakdown</h3>
+            </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="table">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium text-gray-500">Month</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Income</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Expenses</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Balance</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-500">Transactions</th>
+                  <tr>
+                    <th>Month</th>
+                    <th className="text-right">Income</th>
+                    <th className="text-right">Expenses</th>
+                    <th className="text-right">Balance</th>
+                    <th className="text-right">Transactions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {monthlyTrends.slice().reverse().map(month => (
-                    <tr key={month.mes} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{month.mes}</td>
-                      <td className="py-3 px-4 text-right text-success-600">
-                        {formatCurrency(month.ingresos)}
-                      </td>
-                      <td className="py-3 px-4 text-right text-danger-600">
-                        {formatCurrency(month.gastos)}
-                      </td>
-                      <td className={`py-3 px-4 text-right font-medium ${
-                        parseFloat(month.ingresos) - parseFloat(month.gastos) >= 0
-                          ? 'text-success-600'
-                          : 'text-danger-600'
+                    <tr key={month.mes}>
+                      <td className="font-medium">{month.mes}</td>
+                      <td className="text-right text-emerald-600 font-medium">{formatCurrency(month.ingresos)}</td>
+                      <td className="text-right text-red-600 font-medium">{formatCurrency(month.gastos)}</td>
+                      <td className={`text-right font-semibold ${
+                        parseFloat(month.ingresos) - parseFloat(month.gastos) >= 0 ? 'text-emerald-600' : 'text-red-600'
                       }`}>
                         {formatCurrency(parseFloat(month.ingresos) - parseFloat(month.gastos))}
                       </td>
-                      <td className="py-3 px-4 text-right text-gray-500">
-                        {month.num_movimientos}
-                      </td>
+                      <td className="text-right text-gray-500">{month.num_movimientos}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -612,8 +624,8 @@ function Reports() {
       {/* Providers Tab */}
       {activeTab === 'providers' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card">
-            <h3 className="card-title mb-4">Top Providers/Vendors</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">Top Providers/Vendors</h3>
             {spendingByProvider.length > 0 ? (
               <div className="h-96">
                 <Bar data={providerChartData} options={barOptions} />
@@ -625,17 +637,17 @@ function Reports() {
             )}
           </div>
 
-          <div className="card">
-            <h3 className="card-title mb-4">Provider Details</h3>
+          <div className="card card-body">
+            <h3 className="card-title mb-6">Provider Details</h3>
             <div className="space-y-3">
               {spendingByProvider.map((provider, idx) => (
-                <div key={provider.proveedor || idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={provider.proveedor || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                   <div>
-                    <p className="font-medium">{provider.proveedor || 'Unknown'}</p>
+                    <p className="font-semibold text-gray-900">{provider.proveedor || 'Unknown'}</p>
                     <p className="text-sm text-gray-500">{provider.cantidad} transactions</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-danger-600">{formatCurrency(provider.total)}</p>
+                    <p className="font-bold text-red-600">{formatCurrency(provider.total)}</p>
                     <p className="text-sm text-gray-500">
                       Avg: {formatCurrency(parseFloat(provider.total) / (provider.cantidad || 1))}
                     </p>
@@ -643,7 +655,7 @@ function Reports() {
                 </div>
               ))}
               {spendingByProvider.length === 0 && (
-                <p className="text-gray-500 text-center py-8">No provider data for this period</p>
+                <div className="text-center py-8 text-gray-500">No provider data for this period</div>
               )}
             </div>
           </div>

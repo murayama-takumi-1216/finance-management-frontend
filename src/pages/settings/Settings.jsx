@@ -17,7 +17,7 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useNotificationsStore } from '../../store/useStore';
-import { usersAPI, integrationsAPI, preferencesAPI } from '../../services/api';
+import { usersAPI, preferencesAPI } from '../../services/api';
 import notificationSound, { NOTIFICATION_SOUNDS } from '../../utils/notificationSound';
 
 function Settings() {
@@ -25,9 +25,6 @@ function Settings() {
   const { preferences, fetchPreferences, updatePreferences } = useNotificationsStore();
   const [activeTab, setActiveTab] = useState('profile');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [integrations, setIntegrations] = useState([]);
-  const [loadingIntegrations, setLoadingIntegrations] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
 
   // Local state for notification preferences (for Save button approach)
@@ -240,38 +237,10 @@ function Settings() {
     }
   };
 
-  const loadIntegrations = async () => {
-    if (integrations.length > 0) return;
-    setLoadingIntegrations(true);
-    try {
-      const { data } = await integrationsAPI.getAll();
-      setIntegrations(data);
-    } catch (error) {
-      console.error('Failed to load integrations');
-    } finally {
-      setLoadingIntegrations(false);
-    }
-  };
-
-  const handleGoogleCalendarConnect = async () => {
-    try {
-      toast.loading('Connecting to Google Calendar...');
-      // This would typically redirect to OAuth flow
-      // For now, show a placeholder
-      toast.dismiss();
-      toast.success('Google Calendar integration coming soon!');
-      setShowCalendarModal(false);
-    } catch (error) {
-      toast.dismiss();
-      toast.error('Failed to connect');
-    }
-  };
-
   const tabs = [
     { id: 'profile', label: 'Profile', icon: UserCircleIcon },
     { id: 'security', label: 'Security', icon: ShieldCheckIcon },
     { id: 'notifications', label: 'Notifications', icon: BellIcon },
-    { id: 'integrations', label: 'Integrations', icon: DevicePhoneMobileIcon },
   ];
 
   return (
@@ -291,7 +260,6 @@ function Settings() {
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id);
-                  if (tab.id === 'integrations') loadIntegrations();
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   activeTab === tab.id
@@ -396,60 +364,6 @@ function Settings() {
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <div className="space-y-6">
-              {/* General Notification Settings */}
-              <div className="card">
-                <h2 className="card-title mb-6">General Settings</h2>
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Enable Notifications</p>
-                      <p className="text-sm text-gray-500">Receive in-app notifications</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={localPreferences.notificationsEnabled}
-                        onChange={(e) => handleLocalPreferenceChange('notificationsEnabled', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Browser Notifications</p>
-                      <p className="text-sm text-gray-500">Show desktop notifications</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={localPreferences.browserNotifications}
-                        onChange={(e) => handleLocalPreferenceChange('browserNotifications', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Email Notifications</p>
-                      <p className="text-sm text-gray-500">Receive email updates about your account activity</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={localPreferences.emailNotifications}
-                        onChange={(e) => handleLocalPreferenceChange('emailNotifications', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
               {/* Notification Sound Settings */}
               <div className="card">
                 <h2 className="card-title mb-6">
@@ -659,92 +573,6 @@ function Settings() {
             </div>
           )}
 
-          {/* Integrations Tab */}
-          {activeTab === 'integrations' && (
-            <div className="space-y-6">
-              <div className="card">
-                <h2 className="card-title mb-6">Calendar Integration</h2>
-                <p className="text-gray-600 mb-4">
-                  Sync your financial events and payment reminders with your calendar.
-                </p>
-                <button onClick={() => setShowCalendarModal(true)} className="btn-secondary">
-                  <DevicePhoneMobileIcon className="h-5 w-5 mr-2" />
-                  Connect Calendar
-                </button>
-              </div>
-
-              <div className="card">
-                <h2 className="card-title mb-6">Connected Services</h2>
-                {loadingIntegrations ? (
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-16 bg-gray-200 rounded" />
-                    <div className="h-16 bg-gray-200 rounded" />
-                  </div>
-                ) : integrations.length > 0 ? (
-                  <div className="space-y-3">
-                    {integrations.map(integration => (
-                      <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                            <DevicePhoneMobileIcon className="h-5 w-5 text-gray-500" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 capitalize">{integration.proveedor}</p>
-                            <p className="text-sm text-gray-500">
-                              {integration.activo ? 'Connected' : 'Disconnected'}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`badge ${integration.activo ? 'badge-success' : 'badge-gray'}`}>
-                          {integration.activo ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">No integrations connected yet</p>
-                )}
-              </div>
-
-              <div className="card">
-                <h2 className="card-title mb-4">Available Integrations</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                        <span className="text-red-600 font-bold text-sm">G</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Google Calendar</p>
-                        <p className="text-xs text-gray-500">Sync events</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setShowCalendarModal(true)}
-                      className="w-full btn-secondary text-sm"
-                    >
-                      Connect
-                    </button>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-blue-600 font-bold text-sm">O</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Outlook Calendar</p>
-                        <p className="text-xs text-gray-500">Sync events</p>
-                      </div>
-                    </div>
-                    <button className="w-full btn-secondary text-sm" disabled>
-                      Coming Soon
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -834,97 +662,6 @@ function Settings() {
                       </button>
                     </div>
                   </form>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
-
-      {/* Calendar Integration Modal */}
-      <Transition appear show={showCalendarModal} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setShowCalendarModal(false)}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                  <div className="flex items-center justify-between mb-6">
-                    <Dialog.Title className="text-lg font-semibold">Connect Calendar</Dialog.Title>
-                    <button onClick={() => setShowCalendarModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                      <XMarkIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  <p className="text-gray-600 mb-6">
-                    Connect your calendar to sync financial events and payment reminders automatically.
-                  </p>
-
-                  <div className="space-y-3">
-                    <button
-                      onClick={handleGoogleCalendarConnect}
-                      className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                        <span className="text-red-600 font-bold">G</span>
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-gray-900">Google Calendar</p>
-                        <p className="text-sm text-gray-500">Connect with Google</p>
-                      </div>
-                    </button>
-
-                    <button
-                      disabled
-                      className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-50 cursor-not-allowed"
-                    >
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-blue-600 font-bold">O</span>
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-gray-900">Outlook Calendar</p>
-                        <p className="text-sm text-gray-500">Coming soon</p>
-                      </div>
-                    </button>
-
-                    <button
-                      disabled
-                      className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg opacity-50 cursor-not-allowed"
-                    >
-                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-600 font-bold">A</span>
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-gray-900">Apple Calendar</p>
-                        <p className="text-sm text-gray-500">Coming soon</p>
-                      </div>
-                    </button>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t">
-                    <button onClick={() => setShowCalendarModal(false)} className="w-full btn-secondary">
-                      Cancel
-                    </button>
-                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

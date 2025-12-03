@@ -16,26 +16,33 @@ import {
   FolderIcon,
   TagIcon,
   DocumentChartBarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  WalletIcon,
+  SparklesIcon,
+  ArrowLeftIcon,
+  BellIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useAccountsStore, useUIStore } from '../store/useStore';
 import NotificationBell from '../components/NotificationBell';
 
 const mainNavItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Accounts', href: '/accounts', icon: CreditCardIcon },
-  { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentListIcon },
-  { name: 'Calendar', href: '/calendar', icon: CalendarIcon },
-  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, color: 'indigo' },
+  { name: 'Accounts', href: '/accounts', icon: WalletIcon, color: 'emerald' },
+  { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentListIcon, color: 'amber' },
+  { name: 'Calendar', href: '/calendar', icon: CalendarIcon, color: 'rose' },
+  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, color: 'slate' },
 ];
 
 const accountNavItems = [
-  { name: 'Overview', href: '', icon: HomeIcon },
-  { name: 'Movements', href: '/movements', icon: DocumentChartBarIcon },
-  { name: 'Categories', href: '/categories', icon: FolderIcon },
-  { name: 'Tags', href: '/tags', icon: TagIcon },
-  { name: 'Reports', href: '/reports', icon: ChartBarIcon },
-  { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentListIcon },
-  { name: 'Calendar', href: '/calendar', icon: CalendarIcon },
+  { name: 'Overview', href: '', icon: HomeIcon, color: 'indigo' },
+  { name: 'Movements', href: '/movements', icon: DocumentChartBarIcon, color: 'emerald' },
+  { name: 'Categories', href: '/categories', icon: FolderIcon, color: 'violet' },
+  { name: 'Tags', href: '/tags', icon: TagIcon, color: 'pink' },
+  { name: 'Reports', href: '/reports', icon: ChartBarIcon, color: 'cyan' },
+  { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentListIcon, color: 'amber' },
+  { name: 'Calendar', href: '/calendar', icon: CalendarIcon, color: 'rose' },
 ];
 
 function DashboardLayout() {
@@ -67,7 +74,7 @@ function DashboardLayout() {
   const isAccountPage = !!accountId;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/50">
       {/* Mobile menu */}
       <Transition.Root show={mobileMenuOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50 lg:hidden" onClose={setMobileMenuOpen}>
@@ -80,7 +87,7 @@ function DashboardLayout() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-900/80" />
+            <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 flex">
@@ -94,21 +101,45 @@ function DashboardLayout() {
               leaveTo="-translate-x-full"
             >
               <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
-                <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                  <button
-                    type="button"
-                    className="-m-2.5 p-2.5"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <XMarkIcon className="h-6 w-6 text-white" />
-                  </button>
-                </div>
-
-                <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-                  <div className="flex h-16 shrink-0 items-center">
-                    <span className="text-xl font-bold text-primary-600">Finance Manager</span>
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-in-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in-out duration-300"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
+                    <button
+                      type="button"
+                      className="-m-2.5 p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <XMarkIcon className="h-6 w-6 text-white" />
+                    </button>
                   </div>
-                  <nav className="flex flex-1 flex-col">
+                </Transition.Child>
+
+                {/* Mobile Sidebar Content */}
+                <div className="flex grow flex-col overflow-y-auto bg-white">
+                  {/* Logo */}
+                  <div className="flex h-20 items-center px-6 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                        <SparklesIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                          Finance
+                        </span>
+                        <span className="text-lg font-bold text-gray-900"> Manager</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation */}
+                  <nav className="flex flex-1 flex-col px-4 py-6">
                     <SidebarContent
                       isAccountPage={isAccountPage}
                       accountId={accountId}
@@ -117,6 +148,21 @@ function DashboardLayout() {
                       onClose={() => setMobileMenuOpen(false)}
                     />
                   </nav>
+
+                  {/* User section */}
+                  <div className="border-t border-gray-100 p-4">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <span className="text-sm font-semibold text-white">
+                          {user?.nombre?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{user?.nombre || 'User'}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -126,23 +172,34 @@ function DashboardLayout() {
 
       {/* Desktop sidebar */}
       <div
-        className={`hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col transition-all duration-300 ${
-          sidebarOpen ? 'lg:w-64' : 'lg:w-20'
+        className={`hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col transition-all duration-300 ease-in-out ${
+          sidebarOpen ? 'lg:w-72' : 'lg:w-20'
         }`}
       >
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
-          <div className="flex h-16 shrink-0 items-center justify-between">
-            {sidebarOpen && (
-              <span className="text-xl font-bold text-primary-600">Finance Manager</span>
+        <div className="flex grow flex-col overflow-y-auto bg-white border-r border-gray-200/80">
+          {/* Logo */}
+          <div className={`flex h-20 items-center border-b border-gray-100 ${sidebarOpen ? 'px-6' : 'px-4 justify-center'}`}>
+            {sidebarOpen ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                  <SparklesIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Finance
+                  </span>
+                  <span className="text-lg font-bold text-gray-900"> Manager</span>
+                </div>
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                <SparklesIcon className="h-6 w-6 text-white" />
+              </div>
             )}
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <Bars3Icon className="h-5 w-5 text-gray-500" />
-            </button>
           </div>
-          <nav className="flex flex-1 flex-col">
+
+          {/* Navigation */}
+          <nav className={`flex flex-1 flex-col ${sidebarOpen ? 'px-4' : 'px-2'} py-6`}>
             <SidebarContent
               isAccountPage={isAccountPage}
               accountId={accountId}
@@ -151,51 +208,82 @@ function DashboardLayout() {
               collapsed={!sidebarOpen}
             />
           </nav>
+
+          {/* Collapse button */}
+          <div className={`border-t border-gray-100 p-4 ${!sidebarOpen && 'flex justify-center'}`}>
+            <button
+              onClick={toggleSidebar}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all ${
+                sidebarOpen ? 'w-full' : 'w-10 h-10 justify-center'
+              }`}
+            >
+              {sidebarOpen ? (
+                <>
+                  <ChevronLeftIcon className="h-5 w-5" />
+                  <span>Collapse</span>
+                </>
+              ) : (
+                <ChevronRightIcon className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className={`${sidebarOpen ? 'lg:pl-64' : 'lg:pl-20'} transition-all duration-300`}>
+      <div className={`${sidebarOpen ? 'lg:pl-72' : 'lg:pl-20'} transition-all duration-300 ease-in-out`}>
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <Bars3Icon className="h-6 w-6" />
-          </button>
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/80">
+          <div className="flex h-16 items-center gap-x-4 px-4 sm:px-6 lg:px-8">
+            {/* Mobile menu button */}
+            <button
+              type="button"
+              className="p-2 -m-2 text-gray-500 hover:text-gray-700 lg:hidden rounded-lg hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
 
-          {/* Separator */}
-          <div className="h-6 w-px bg-gray-200 lg:hidden" />
+            {/* Separator */}
+            <div className="h-6 w-px bg-gray-200 lg:hidden" />
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            {/* Account selector for account pages */}
-            {isAccountPage && currentAccount && (
-              <div className="flex items-center">
-                <span className="text-sm text-gray-500">Account:</span>
-                <span className="ml-2 font-medium text-gray-900">{currentAccount.nombre}</span>
-              </div>
-            )}
+            {/* Left side */}
+            <div className="flex flex-1 items-center gap-x-4">
+              {/* Account badge */}
+              {isAccountPage && currentAccount && (
+                <div className="hidden sm:flex items-center gap-2">
+                  <NavLink
+                    to="/accounts"
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                  >
+                    <ArrowLeftIcon className="h-4 w-4" />
+                  </NavLink>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100">
+                    <WalletIcon className="h-4 w-4 text-indigo-600" />
+                    <span className="text-sm font-medium text-indigo-700">{currentAccount.nombre}</span>
+                    <span className="text-xs text-indigo-500 capitalize">({currentAccount.tipo})</span>
+                  </div>
+                </div>
+              )}
+            </div>
 
-            <div className="flex flex-1 items-center justify-end gap-x-4 lg:gap-x-6">
+            {/* Right side */}
+            <div className="flex items-center gap-x-3">
               {/* Notification Bell */}
               <NotificationBell />
 
               {/* User menu */}
               <Menu as="div" className="relative">
-                <Menu.Button className="-m-1.5 flex items-center p-1.5">
-                  <div className="flex items-center gap-x-3">
-                    <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-                      <UserIcon className="h-5 w-5 text-primary-600" />
-                    </div>
-                    <span className="hidden lg:flex lg:items-center">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {user?.nombre || 'User'}
-                      </span>
-                      <ChevronDownIcon className="ml-2 h-5 w-5 text-gray-400" />
+                <Menu.Button className="flex items-center gap-3 p-1.5 pr-3 rounded-xl hover:bg-gray-100 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
+                    <span className="text-xs font-semibold text-white">
+                      {user?.nombre?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-semibold text-gray-900">{user?.nombre || 'User'}</p>
+                  </div>
+                  <ChevronDownIcon className="hidden md:block h-4 w-4 text-gray-400" />
                 </Menu.Button>
 
                 <Transition
@@ -207,15 +295,22 @@ function DashboardLayout() {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 z-10 mt-2.5 w-48 origin-top-right rounded-lg bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
+                  <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-xl bg-white p-2 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                    {/* User info */}
+                    <div className="px-3 py-2 mb-2 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">{user?.nombre || 'User'}</p>
+                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                    </div>
+
                     <Menu.Item>
                       {({ active }) => (
                         <NavLink
                           to="/settings"
-                          className={`block px-4 py-2 text-sm ${
-                            active ? 'bg-gray-50' : ''
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                            active ? 'bg-gray-100' : ''
                           } text-gray-700`}
                         >
+                          <Cog6ToothIcon className="h-4 w-4 text-gray-500" />
                           Settings
                         </NavLink>
                       )}
@@ -224,10 +319,11 @@ function DashboardLayout() {
                       {({ active }) => (
                         <button
                           onClick={handleLogout}
-                          className={`block w-full text-left px-4 py-2 text-sm ${
-                            active ? 'bg-gray-50' : ''
-                          } text-gray-700`}
+                          className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm ${
+                            active ? 'bg-red-50' : ''
+                          } text-red-600`}
                         >
+                          <ArrowRightOnRectangleIcon className="h-4 w-4" />
                           Sign out
                         </button>
                       )}
@@ -237,7 +333,7 @@ function DashboardLayout() {
               </Menu>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Page content */}
         <main className="py-6">
@@ -254,9 +350,15 @@ function SidebarContent({ isAccountPage, accountId, currentAccount, accounts, co
   const navItems = isAccountPage ? accountNavItems : mainNavItems;
 
   return (
-    <ul role="list" className="flex flex-1 flex-col gap-y-7">
-      <li>
-        <ul role="list" className="-mx-2 space-y-1">
+    <div className="flex flex-1 flex-col gap-y-6">
+      {/* Main navigation */}
+      <div>
+        {!collapsed && (
+          <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            {isAccountPage ? 'Account Menu' : 'Main Menu'}
+          </p>
+        )}
+        <ul role="list" className="space-y-1">
           {navItems.map((item) => {
             const href = isAccountPage ? `/accounts/${accountId}${item.href}` : item.href;
             return (
@@ -266,57 +368,117 @@ function SidebarContent({ isAccountPage, accountId, currentAccount, accounts, co
                   end={item.href === ''}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `${isActive ? 'sidebar-link-active' : 'sidebar-link'} ${
-                      collapsed ? 'justify-center px-2' : ''
+                    `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      collapsed ? 'justify-center' : ''
+                    } ${
+                      isActive
+                        ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     }`
                   }
                 >
-                  <item.icon className="h-5 w-5 shrink-0" />
-                  {!collapsed && <span>{item.name}</span>}
+                  {({ isActive }) => (
+                    <>
+                      <div className={`flex-shrink-0 ${isActive ? '' : 'group-hover:scale-110'} transition-transform`}>
+                        <item.icon className={`h-5 w-5 ${isActive ? 'text-indigo-600' : 'text-gray-500 group-hover:text-gray-700'}`} />
+                      </div>
+                      {!collapsed && (
+                        <span className="flex-1">{item.name}</span>
+                      )}
+                      {!collapsed && isActive && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+                      )}
+                    </>
+                  )}
                 </NavLink>
               </li>
             );
           })}
         </ul>
-      </li>
+      </div>
 
       {/* Back to accounts link when on account page */}
       {isAccountPage && (
-        <li>
+        <div>
           <NavLink
             to="/accounts"
             onClick={onClose}
-            className={`sidebar-link text-primary-600 ${collapsed ? 'justify-center px-2' : ''}`}
+            className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-all ${
+              collapsed ? 'justify-center' : ''
+            }`}
           >
-            <ArrowRightOnRectangleIcon className="h-5 w-5 shrink-0 rotate-180" />
+            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             {!collapsed && <span>Back to Accounts</span>}
           </NavLink>
-        </li>
+        </div>
       )}
 
-      {/* Quick account switcher when not on account page */}
+      {/* Quick account switcher */}
       {!isAccountPage && accounts.length > 0 && !collapsed && (
-        <li>
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+        <div className="mt-auto">
+          <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
             Quick Access
-          </div>
-          <ul role="list" className="-mx-2 space-y-1">
-            {accounts.slice(0, 5).map((account) => (
+          </p>
+          <ul role="list" className="space-y-1">
+            {accounts.slice(0, 4).map((account, index) => (
               <li key={account.id}>
                 <NavLink
                   to={`/accounts/${account.id}`}
                   onClick={onClose}
-                  className="sidebar-link text-sm"
+                  className="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all"
                 >
-                  <CreditCardIcon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{account.nombre}</span>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    ['bg-emerald-100', 'bg-violet-100', 'bg-amber-100', 'bg-rose-100'][index % 4]
+                  }`}>
+                    <WalletIcon className={`h-4 w-4 ${
+                      ['text-emerald-600', 'text-violet-600', 'text-amber-600', 'text-rose-600'][index % 4]
+                    }`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{account.nombre}</p>
+                    <p className="text-xs text-gray-400 capitalize">{account.tipo}</p>
+                  </div>
                 </NavLink>
               </li>
             ))}
+            {accounts.length > 4 && (
+              <li>
+                <NavLink
+                  to="/accounts"
+                  onClick={onClose}
+                  className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
+                >
+                  <span>View all ({accounts.length})</span>
+                </NavLink>
+              </li>
+            )}
           </ul>
-        </li>
+        </div>
       )}
-    </ul>
+
+      {/* Collapsed quick access */}
+      {!isAccountPage && accounts.length > 0 && collapsed && (
+        <div className="mt-auto space-y-1">
+          {accounts.slice(0, 3).map((account, index) => (
+            <NavLink
+              key={account.id}
+              to={`/accounts/${account.id}`}
+              onClick={onClose}
+              className="group flex items-center justify-center p-2 rounded-xl hover:bg-gray-100 transition-all"
+              title={account.nombre}
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                ['bg-emerald-100', 'bg-violet-100', 'bg-amber-100'][index % 3]
+              }`}>
+                <WalletIcon className={`h-4 w-4 ${
+                  ['text-emerald-600', 'text-violet-600', 'text-amber-600'][index % 3]
+                }`} />
+              </div>
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

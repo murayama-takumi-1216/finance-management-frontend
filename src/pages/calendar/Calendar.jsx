@@ -131,7 +131,11 @@ function Calendar() {
   };
 
   const getEventsForDate = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
+    // Format date as YYYY-MM-DD using local time (not UTC)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
 
     return (events ?? [])
       .filter(Boolean) // remove undefined / null items
@@ -267,6 +271,14 @@ function Calendar() {
       await createReminder(accountId, payload);
       toast.success('Reminder created');
       setShowReminderModal(false);
+
+      // Refresh events and reminders to show the new data immediately
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const start = new Date(year, month, 1).toISOString().split('T')[0];
+      const end = new Date(year, month + 1, 0).toISOString().split('T')[0];
+      fetchEvents(accountId, { start, end });
+      fetchReminders(accountId);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Operation failed');
     }

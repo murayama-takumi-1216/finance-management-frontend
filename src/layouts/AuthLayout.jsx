@@ -1,34 +1,25 @@
 import { Outlet } from 'react-router-dom';
-import { SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 function AuthLayout() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-indigo-400/20 rounded-full blur-2xl" />
-
-        {/* Floating icons */}
-        <div className="absolute top-32 right-24 p-4 bg-white/10 backdrop-blur-sm rounded-2xl animate-bounce" style={{ animationDuration: '3s' }}>
-          <ChartBarIcon className="w-8 h-8 text-white" />
-        </div>
-        <div className="absolute bottom-40 left-24 p-4 bg-white/10 backdrop-blur-sm rounded-2xl animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-          <CurrencyDollarIcon className="w-8 h-8 text-white" />
-        </div>
-        <div className="absolute top-1/2 right-32 p-4 bg-white/10 backdrop-blur-sm rounded-2xl animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }}>
-          <ShieldCheckIcon className="w-8 h-8 text-white" />
-        </div>
+      <div
+        className="hidden lg:flex lg:w-1/2 w-full justify-center relative overflow-hidden"
+        style={{
+          backgroundImage: 'url(/background.jpeg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/40" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-16">
           <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-              <SparklesIcon className="w-8 h-8 text-white" />
-            </div>
-            <span className="text-3xl font-bold text-white">Finance Pro</span>
+            <img src="/logo.png" alt="Logo" className="w-12 h-12 object-contain" />
+            <span className="text-3xl font-bold text-white">Finance Manager</span>
           </div>
 
           <h1 className="text-4xl font-bold text-white mb-6 leading-tight">
@@ -69,10 +60,8 @@ function AuthLayout() {
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
-              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
-                <SparklesIcon className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900">Finance Pro</span>
+              <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+              <span className="text-2xl font-bold text-gray-900">Finance Manager</span>
             </div>
             <p className="text-gray-500">Administra tus finanzas con facilidad</p>
           </div>
@@ -81,7 +70,7 @@ function AuthLayout() {
 
           {/* Footer */}
           <p className="text-center text-xs text-gray-400 mt-8">
-            &copy; {new Date().getFullYear()} Finance Pro. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} Finance Manager. Todos los derechos reservados.
           </p>
         </div>
       </div>

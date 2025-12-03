@@ -19,7 +19,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   WalletIcon,
-  SparklesIcon,
   ArrowLeftIcon,
   BellIcon,
   MagnifyingGlassIcon,
@@ -130,9 +129,7 @@ function DashboardLayout() {
                   {/* Logo */}
                   <div className="flex h-20 items-center px-6 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                        <SparklesIcon className="h-6 w-6 text-white" />
-                      </div>
+                      <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
                       <div>
                         <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                           Finance
@@ -185,9 +182,7 @@ function DashboardLayout() {
           <div className={`flex h-20 items-center border-b border-gray-100 ${sidebarOpen ? 'px-6' : 'px-4 justify-center'}`}>
             {sidebarOpen ? (
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                  <SparklesIcon className="h-6 w-6 text-white" />
-                </div>
+                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
                 <div>
                   <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                     Finance
@@ -196,9 +191,7 @@ function DashboardLayout() {
                 </div>
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                <SparklesIcon className="h-6 w-6 text-white" />
-              </div>
+              <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
             )}
           </div>
 

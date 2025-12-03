@@ -161,6 +161,37 @@ function EmptyState({ icon: Icon, title, description, action, actionLink }) {
   );
 }
 
+// Helper to fill in missing months with zero values
+function fillMissingMonths(trends, numMonths = 12) {
+  if (!trends || !Array.isArray(trends)) return [];
+
+  const dataMap = new Map(trends.map(t => [t.periodo, t]));
+  const filledData = [];
+  const now = new Date();
+
+  for (let i = numMonths - 1; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const periodo = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+
+    const existing = dataMap.get(periodo);
+    if (existing) {
+      filledData.push(existing);
+    } else {
+      filledData.push({
+        periodo,
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        ingresos: 0,
+        gastos: 0,
+        balance: 0,
+        numMovimientos: 0
+      });
+    }
+  }
+
+  return filledData;
+}
+
 function Dashboard() {
   const { user } = useAuthStore();
   const { accounts, fetchAccounts, isLoading: accountsLoading } = useAccountsStore();
@@ -217,7 +248,13 @@ function Dashboard() {
         reportsAPI.getTopCategories(selectedAccountId, { tipo: 'gasto', limit: 5, ...dateParams }).catch(() => ({ data: null })),
         reportsAPI.getSpendingByProvider(selectedAccountId, { limit: 5, ...dateParams }).catch(() => ({ data: null })),
       ]).then(([trends, incomeVsExpenses, expensesByCategory, incomeByCategory, topCategories, providers]) => {
-        setMonthlyTrendsData(trends.data);
+        // Fill missing months for monthly trends chart
+        if (trends.data?.trends) {
+          const filledTrends = fillMissingMonths(trends.data.trends, 12);
+          setMonthlyTrendsData({ ...trends.data, trends: filledTrends });
+        } else {
+          setMonthlyTrendsData(trends.data);
+        }
         setIncomeVsExpensesData(incomeVsExpenses.data);
         setExpensesByCategoryData(expensesByCategory.data);
         setIncomeByCategoryData(incomeByCategory.data);

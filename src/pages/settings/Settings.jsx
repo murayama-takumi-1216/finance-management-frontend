@@ -15,6 +15,8 @@ import {
   MusicalNoteIcon,
   ExclamationTriangleIcon,
   Cog6ToothIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useNotificationsStore } from '../../store/useStore';
 import { usersAPI, preferencesAPI } from '../../services/api';
@@ -44,6 +46,9 @@ function Settings() {
   const [showDeleteSoundModal, setShowDeleteSoundModal] = useState(false);
   const [soundToDelete, setSoundToDelete] = useState(null);
   const [isDeletingSound, setIsDeletingSound] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const fetchCustomSounds = async () => {
     try {
@@ -209,6 +214,9 @@ function Settings() {
       toast.success('Contraseña cambiada exitosamente');
       setShowPasswordModal(false);
       resetPassword();
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al cambiar la contraseña');
     }
@@ -632,7 +640,7 @@ function Settings() {
 
       {/* Password Modal */}
       <Transition appear show={showPasswordModal} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setShowPasswordModal(false)}>
+        <Dialog as="div" className="relative z-50" onClose={() => { setShowPasswordModal(false); setShowCurrentPassword(false); setShowNewPassword(false); setShowConfirmPassword(false); }}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -659,7 +667,7 @@ function Settings() {
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
                     <Dialog.Title className="modal-title">Cambiar Contraseña</Dialog.Title>
-                    <button onClick={() => setShowPasswordModal(false)} className="btn-icon-sm hover:bg-gray-100">
+                    <button onClick={() => { setShowPasswordModal(false); setShowCurrentPassword(false); setShowNewPassword(false); setShowConfirmPassword(false); }} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
                   </div>
@@ -668,11 +676,24 @@ function Settings() {
                     <div className="modal-body space-y-5">
                       <div className="form-group">
                         <label className="label">Contraseña Actual</label>
-                        <input
-                          type="password"
-                          className={`input ${passwordErrors.currentPassword ? 'input-error' : ''}`}
-                          {...registerPassword('currentPassword', { required: 'La contraseña actual es requerida' })}
-                        />
+                        <div className="relative">
+                          <input
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            className={`input pr-10 ${passwordErrors.currentPassword ? 'input-error' : ''}`}
+                            {...registerPassword('currentPassword', { required: 'La contraseña actual es requerida' })}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            {showCurrentPassword ? (
+                              <EyeSlashIcon className="h-5 w-5" />
+                            ) : (
+                              <EyeIcon className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
                         {passwordErrors.currentPassword && (
                           <p className="error-text">{passwordErrors.currentPassword.message}</p>
                         )}
@@ -680,14 +701,27 @@ function Settings() {
 
                       <div className="form-group">
                         <label className="label">Nueva Contraseña</label>
-                        <input
-                          type="password"
-                          className={`input ${passwordErrors.newPassword ? 'input-error' : ''}`}
-                          {...registerPassword('newPassword', {
-                            required: 'La nueva contraseña es requerida',
-                            minLength: { value: 8, message: 'La contraseña debe tener al menos 8 caracteres' },
-                          })}
-                        />
+                        <div className="relative">
+                          <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            className={`input pr-10 ${passwordErrors.newPassword ? 'input-error' : ''}`}
+                            {...registerPassword('newPassword', {
+                              required: 'La nueva contraseña es requerida',
+                              minLength: { value: 8, message: 'La contraseña debe tener al menos 8 caracteres' },
+                            })}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            {showNewPassword ? (
+                              <EyeSlashIcon className="h-5 w-5" />
+                            ) : (
+                              <EyeIcon className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
                         {passwordErrors.newPassword && (
                           <p className="error-text">{passwordErrors.newPassword.message}</p>
                         )}
@@ -695,14 +729,27 @@ function Settings() {
 
                       <div className="form-group">
                         <label className="label">Confirmar Nueva Contraseña</label>
-                        <input
-                          type="password"
-                          className={`input ${passwordErrors.confirmPassword ? 'input-error' : ''}`}
-                          {...registerPassword('confirmPassword', {
-                            required: 'Por favor confirma tu contraseña',
-                            validate: value => value === watch('newPassword') || 'Las contraseñas no coinciden',
-                          })}
-                        />
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            className={`input pr-10 ${passwordErrors.confirmPassword ? 'input-error' : ''}`}
+                            {...registerPassword('confirmPassword', {
+                              required: 'Por favor confirma tu contraseña',
+                              validate: value => value === watch('newPassword') || 'Las contraseñas no coinciden',
+                            })}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            {showConfirmPassword ? (
+                              <EyeSlashIcon className="h-5 w-5" />
+                            ) : (
+                              <EyeIcon className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
                         {passwordErrors.confirmPassword && (
                           <p className="error-text">{passwordErrors.confirmPassword.message}</p>
                         )}
@@ -710,7 +757,7 @@ function Settings() {
                     </div>
 
                     <div className="modal-footer">
-                      <button type="button" onClick={() => setShowPasswordModal(false)} className="btn-secondary">
+                      <button type="button" onClick={() => { setShowPasswordModal(false); setShowCurrentPassword(false); setShowNewPassword(false); setShowConfirmPassword(false); }} className="btn-secondary">
                         Cancelar
                       </button>
                       <button type="submit" disabled={isPasswordSubmitting} className="btn-primary">

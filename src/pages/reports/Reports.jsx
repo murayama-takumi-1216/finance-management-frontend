@@ -191,6 +191,121 @@ function Reports() {
     }
   };
 
+  // Helper to get ISO week number
+  const getISOWeek = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  };
+
+  // Helper to get ISO week year (handles year boundaries correctly)
+  const getISOWeekYear = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    return d.getUTCFullYear();
+  };
+
+  // Helper to get Monday of the week for a given date
+  const getMondayOfWeek = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+    return new Date(d.setDate(diff));
+  };
+
+  // Helper to fill in missing dates/periods with zero values
+  const fillMissingPeriods = (data, startDate, endDate, granularity) => {
+    const dataMap = new Map(data.map(d => [d.periodo, d]));
+    const filledData = [];
+    const seenPeriods = new Set();
+    let current = new Date(startDate);
+    const end = new Date(endDate);
+
+    // For weekly, align to Monday of start week
+    if (granularity === 'weekly') {
+      current = getMondayOfWeek(current);
+    }
+
+    while (current <= end) {
+      let periodo;
+      let nextDate;
+
+      switch (granularity) {
+        case 'daily':
+          periodo = current.toISOString().split('T')[0];
+          nextDate = new Date(current);
+          nextDate.setDate(nextDate.getDate() + 1);
+          break;
+        case 'weekly':
+          // Get ISO week format YYYY-Www using ISO week year
+          const weekNum = getISOWeek(current);
+          const isoYear = getISOWeekYear(current);
+          periodo = `${isoYear}-W${weekNum.toString().padStart(2, '0')}`;
+          nextDate = new Date(current);
+          nextDate.setDate(nextDate.getDate() + 7);
+          break;
+        case 'monthly':
+          periodo = `${current.getFullYear()}-${(current.getMonth() + 1).toString().padStart(2, '0')}`;
+          nextDate = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+          break;
+        case 'quarterly':
+          const quarter = Math.floor(current.getMonth() / 3) + 1;
+          periodo = `${current.getFullYear()}-Q${quarter}`;
+          nextDate = new Date(current.getFullYear(), (quarter) * 3, 1);
+          break;
+        default:
+          periodo = current.toISOString().split('T')[0];
+          nextDate = new Date(current);
+          nextDate.setDate(nextDate.getDate() + 1);
+      }
+
+      // Avoid duplicate periods (can happen with week alignment)
+      if (!seenPeriods.has(periodo)) {
+        seenPeriods.add(periodo);
+        const existing = dataMap.get(periodo);
+        if (existing) {
+          filledData.push(existing);
+        } else {
+          filledData.push({
+            periodo,
+            ingresos: 0,
+            gastos: 0,
+            balance: 0
+          });
+        }
+      }
+
+      current.setTime(nextDate.getTime());
+    }
+
+    // For weekly, also include the current week if end date is mid-week
+    if (granularity === 'weekly') {
+      const endWeekNum = getISOWeek(end);
+      const endIsoYear = getISOWeekYear(end);
+      const endPeriodo = `${endIsoYear}-W${endWeekNum.toString().padStart(2, '0')}`;
+
+      if (!seenPeriods.has(endPeriodo)) {
+        seenPeriods.add(endPeriodo);
+        const existing = dataMap.get(endPeriodo);
+        if (existing) {
+          filledData.push(existing);
+        } else {
+          filledData.push({
+            periodo: endPeriodo,
+            ingresos: 0,
+            gastos: 0,
+            balance: 0
+          });
+        }
+      }
+    }
+
+    return filledData;
+  };
+
   // Load trends data based on granularity
   const loadTrendsData = async (granularity) => {
     setIsLoadingTrends(true);
@@ -218,7 +333,10 @@ function Reports() {
       // API returns { series: [...], totales: {...}, agrupacion: '...', periodo: {...} }
       const data = response.data?.series || [];
 
-      setMonthlyTrends(data.map(t => ({
+      // Fill in missing periods with zero values
+      const filledData = fillMissingPeriods(data, startDate, endDate, granularity);
+
+      setMonthlyTrends(filledData.map(t => ({
         mes: t.periodo,
         ingresos: t.ingresos || 0,
         gastos: t.gastos || 0,

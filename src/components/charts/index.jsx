@@ -943,20 +943,7 @@ function formatCurrencyShort(value) {
 
 function formatPeriodLabel(periodo) {
   if (!periodo) return '';
-  if (periodo.match(/^\d{4}-\d{2}$/)) {
-    const [year, month] = periodo.split('-');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${monthNames[parseInt(month) - 1]} '${year.slice(2)}`;
-  }
-  if (periodo.match(/^\d{4}-W\d{2}$/)) {
-    return `W${periodo.split('W')[1]}`;
-  }
-  if (periodo.match(/^\d{4}$/)) {
-    return periodo;
-  }
-  if (periodo.match(/^\d{4}-Q\d$/)) {
-    return `Q${periodo.split('Q')[1]} '${periodo.split('-')[0].slice(2)}`;
-  }
+  // Return raw format for all period types to match Reports page
   return periodo;
 }
 

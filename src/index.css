@@ -2,119 +2,419 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @layer base {
   html {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50/50 text-gray-900;
+  }
+
+  /* Focus visible for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2;
   }
 }
 
 @layer components {
+  /* ========================================
+     BUTTONS - Modern, Beautiful Styles
+     ======================================== */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl
+           transition-all duration-200 ease-out
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+           active:scale-[0.98] transform;
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply btn bg-gradient-to-r from-indigo-600 to-indigo-700 text-white
+           hover:from-indigo-700 hover:to-indigo-800
+           focus:ring-indigo-500
+           shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+    @apply btn bg-white text-gray-700 border border-gray-200
+           hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900
+           focus:ring-gray-500
+           shadow-sm hover:shadow;
   }
 
   .btn-danger {
-    @apply btn bg-danger-600 text-white hover:bg-danger-500 focus:ring-danger-500;
+    @apply btn bg-gradient-to-r from-red-500 to-red-600 text-white
+           hover:from-red-600 hover:to-red-700
+           focus:ring-red-500
+           shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30;
   }
 
   .btn-success {
-    @apply btn bg-success-600 text-white hover:bg-success-500 focus:ring-success-500;
+    @apply btn bg-gradient-to-r from-emerald-500 to-emerald-600 text-white
+           hover:from-emerald-600 hover:to-emerald-700
+           focus:ring-emerald-500
+           shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30;
   }
 
+  .btn-warning {
+    @apply btn bg-gradient-to-r from-amber-500 to-amber-600 text-white
+           hover:from-amber-600 hover:to-amber-700
+           focus:ring-amber-500
+           shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-gray-600
+           hover:bg-gray-100 hover:text-gray-900
+           focus:ring-gray-500;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent text-indigo-600 border-2 border-indigo-600
+           hover:bg-indigo-600 hover:text-white
+           focus:ring-indigo-500;
+  }
+
+  .btn-outline-danger {
+    @apply btn bg-transparent text-red-600 border-2 border-red-600
+           hover:bg-red-600 hover:text-white
+           focus:ring-red-500;
+  }
+
+  /* Button sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base rounded-2xl;
+  }
+
+  .btn-icon {
+    @apply p-2.5 rounded-xl;
+  }
+
+  .btn-icon-sm {
+    @apply p-1.5 rounded-lg;
+  }
+
+  /* ========================================
+     FORM INPUTS - Modern, Clean Styles
+     ======================================== */
   .input {
-    @apply block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500;
+    @apply block w-full rounded-xl border border-gray-200 bg-white
+           px-4 py-3 text-sm text-gray-900 placeholder-gray-400
+           transition-all duration-200
+           focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10
+           hover:border-gray-300
+           disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed;
   }
 
   .input-error {
-    @apply border-danger-500 focus:border-danger-500 focus:ring-danger-500;
+    @apply border-red-300 bg-red-50/50
+           focus:border-red-500 focus:ring-red-500/10
+           hover:border-red-400;
   }
 
+  .input-success {
+    @apply border-emerald-300 bg-emerald-50/50
+           focus:border-emerald-500 focus:ring-emerald-500/10;
+  }
+
+  /* Input with icon */
+  .input-icon-left {
+    @apply pl-11;
+  }
+
+  .input-icon-right {
+    @apply pr-11;
+  }
+
+  .input-icon {
+    @apply absolute inset-y-0 flex items-center pointer-events-none text-gray-400;
+  }
+
+  .input-icon-left-container {
+    @apply input-icon left-0 pl-4;
+  }
+
+  .input-icon-right-container {
+    @apply input-icon right-0 pr-4;
+  }
+
+  /* ========================================
+     SELECT - Modern Dropdown Styles
+     ======================================== */
+  .select {
+    @apply block w-full rounded-xl border border-gray-200 bg-white
+           px-4 py-3 text-sm text-gray-900
+           transition-all duration-200
+           focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10
+           hover:border-gray-300
+           disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
+           appearance-none bg-no-repeat bg-right
+           cursor-pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.5rem;
+  }
+
+  .select-error {
+    @apply border-red-300 bg-red-50/50
+           focus:border-red-500 focus:ring-red-500/10;
+  }
+
+  /* ========================================
+     TEXTAREA - Modern Styles
+     ======================================== */
+  .textarea {
+    @apply block w-full rounded-xl border border-gray-200 bg-white
+           px-4 py-3 text-sm text-gray-900 placeholder-gray-400
+           transition-all duration-200 resize-none
+           focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10
+           hover:border-gray-300
+           disabled:bg-gray-50 disabled:text-gray-500;
+  }
+
+  /* ========================================
+     CHECKBOX & RADIO - Modern Styles
+     ======================================== */
+  .checkbox {
+    @apply h-5 w-5 rounded-md border-2 border-gray-300 text-indigo-600
+           transition-all duration-200
+           focus:ring-4 focus:ring-indigo-500/20 focus:ring-offset-0
+           checked:border-indigo-600 checked:bg-indigo-600
+           hover:border-indigo-400
+           cursor-pointer;
+  }
+
+  .radio {
+    @apply h-5 w-5 border-2 border-gray-300 text-indigo-600
+           transition-all duration-200
+           focus:ring-4 focus:ring-indigo-500/20 focus:ring-offset-0
+           checked:border-indigo-600
+           hover:border-indigo-400
+           cursor-pointer;
+  }
+
+  /* Toggle switch */
+  .toggle {
+    @apply relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full
+           border-2 border-transparent transition-colors duration-200 ease-in-out
+           focus:outline-none focus:ring-4 focus:ring-indigo-500/20;
+  }
+
+  .toggle-enabled {
+    @apply bg-indigo-600;
+  }
+
+  .toggle-disabled {
+    @apply bg-gray-200;
+  }
+
+  /* ========================================
+     LABELS & HELPERS
+     ======================================== */
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-medium text-gray-700 mb-2;
   }
 
+  .label-required::after {
+    content: ' *';
+    @apply text-red-500;
+  }
+
+  .helper-text {
+    @apply mt-1.5 text-xs text-gray-500;
+  }
+
+  .error-text {
+    @apply mt-1.5 text-xs text-red-600 flex items-center gap-1;
+  }
+
+  /* ========================================
+     CARDS - Modern Styles
+     ======================================== */
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100
+           transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-lg hover:border-gray-200;
+  }
+
+  .card-body {
+    @apply p-6;
   }
 
   .card-header {
-    @apply flex items-center justify-between mb-4;
+    @apply flex items-center justify-between p-6 pb-0;
   }
 
   .card-title {
     @apply text-lg font-semibold text-gray-900;
   }
 
+  .card-subtitle {
+    @apply text-sm text-gray-500 mt-0.5;
+  }
+
+  .card-footer {
+    @apply flex items-center justify-end gap-3 p-6 pt-0;
+  }
+
+  /* ========================================
+     TABLES - Modern Styles
+     ======================================== */
   .table-container {
-    @apply overflow-x-auto;
+    @apply overflow-x-auto rounded-xl border border-gray-200;
   }
 
   .table {
     @apply min-w-full divide-y divide-gray-200;
   }
 
+  .table thead {
+    @apply bg-gray-50/80;
+  }
+
   .table th {
-    @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+    @apply px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider;
   }
 
   .table td {
-    @apply px-4 py-3 text-sm text-gray-900 whitespace-nowrap;
+    @apply px-6 py-4 text-sm text-gray-700;
+  }
+
+  .table tbody {
+    @apply divide-y divide-gray-100 bg-white;
   }
 
   .table tbody tr {
-    @apply hover:bg-gray-50 transition-colors;
+    @apply hover:bg-gray-50/80 transition-colors;
   }
 
+  .table tbody tr td:first-child {
+    @apply font-medium text-gray-900;
+  }
+
+  /* ========================================
+     BADGES - Modern Styles
+     ======================================== */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold;
+  }
+
+  .badge-sm {
+    @apply px-2 py-0.5 text-[10px];
+  }
+
+  .badge-lg {
+    @apply px-3 py-1.5 text-sm;
   }
 
   .badge-success {
-    @apply badge bg-success-50 text-success-600;
+    @apply badge bg-emerald-100 text-emerald-700;
   }
 
   .badge-warning {
-    @apply badge bg-warning-50 text-warning-600;
+    @apply badge bg-amber-100 text-amber-700;
   }
 
   .badge-danger {
-    @apply badge bg-danger-50 text-danger-600;
+    @apply badge bg-red-100 text-red-700;
   }
 
   .badge-primary {
-    @apply badge bg-primary-50 text-primary-600;
+    @apply badge bg-indigo-100 text-indigo-700;
   }
 
   .badge-gray {
-    @apply badge bg-gray-100 text-gray-600;
+    @apply badge bg-gray-100 text-gray-700;
   }
 
+  .badge-info {
+    @apply badge bg-sky-100 text-sky-700;
+  }
+
+  .badge-purple {
+    @apply badge bg-purple-100 text-purple-700;
+  }
+
+  /* Badge with dot */
+  .badge-dot {
+    @apply flex items-center gap-1.5;
+  }
+
+  .badge-dot::before {
+    content: '';
+    @apply w-1.5 h-1.5 rounded-full bg-current;
+  }
+
+  /* ========================================
+     MODALS & DIALOGS
+     ======================================== */
+  .modal-overlay {
+    @apply fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity;
+  }
+
+  .modal-container {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+  }
+
+  .modal-panel {
+    @apply relative bg-white rounded-2xl shadow-2xl
+           transform transition-all
+           w-full max-w-lg mx-auto my-8
+           border border-gray-100;
+  }
+
+  .modal-header {
+    @apply flex items-center justify-between p-6 border-b border-gray-100;
+  }
+
+  .modal-title {
+    @apply text-xl font-semibold text-gray-900;
+  }
+
+  .modal-body {
+    @apply p-6;
+  }
+
+  .modal-footer {
+    @apply flex items-center justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl;
+  }
+
+  /* ========================================
+     SIDEBAR LINKS
+     ======================================== */
   .sidebar-link {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+           text-gray-600 hover:bg-gray-100 hover:text-gray-900
+           transition-all duration-200;
   }
 
   .sidebar-link-active {
-    @apply sidebar-link bg-primary-50 text-primary-600 hover:bg-primary-100;
+    @apply sidebar-link bg-indigo-50 text-indigo-700 shadow-sm;
   }
 
+  /* ========================================
+     STAT CARDS
+     ======================================== */
   .stat-card {
-    @apply card flex items-center gap-4;
+    @apply card card-body flex items-center gap-4;
   }
 
   .stat-icon {
-    @apply w-12 h-12 rounded-lg flex items-center justify-center;
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm;
   }
 
   .stat-value {
@@ -122,18 +422,283 @@
   }
 
   .stat-label {
-    @apply text-sm text-gray-500;
+    @apply text-sm text-gray-500 font-medium;
+  }
+
+  /* ========================================
+     ALERTS
+     ======================================== */
+  .alert {
+    @apply flex items-start gap-3 p-4 rounded-xl border;
+  }
+
+  .alert-success {
+    @apply alert bg-emerald-50 border-emerald-200 text-emerald-800;
+  }
+
+  .alert-warning {
+    @apply alert bg-amber-50 border-amber-200 text-amber-800;
+  }
+
+  .alert-danger {
+    @apply alert bg-red-50 border-red-200 text-red-800;
+  }
+
+  .alert-info {
+    @apply alert bg-sky-50 border-sky-200 text-sky-800;
+  }
+
+  /* ========================================
+     TABS
+     ======================================== */
+  .tabs {
+    @apply flex gap-1 p-1 rounded-xl bg-gray-100;
+  }
+
+  .tab {
+    @apply flex-1 px-4 py-2.5 text-sm font-medium text-gray-600 rounded-lg
+           transition-all duration-200
+           hover:text-gray-900;
+  }
+
+  .tab-active {
+    @apply tab bg-white text-gray-900 shadow-sm;
+  }
+
+  /* Alternative tabs style */
+  .tabs-underline {
+    @apply flex gap-6 border-b border-gray-200;
+  }
+
+  .tab-underline {
+    @apply pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent -mb-px
+           transition-all duration-200
+           hover:text-gray-700 hover:border-gray-300;
+  }
+
+  .tab-underline-active {
+    @apply tab-underline text-indigo-600 border-indigo-600;
+  }
+
+  /* ========================================
+     TOOLTIPS
+     ======================================== */
+  .tooltip {
+    @apply absolute z-50 px-3 py-2 text-xs font-medium text-white
+           bg-gray-900 rounded-lg shadow-lg
+           opacity-0 invisible transition-all duration-200;
+  }
+
+  .tooltip-visible {
+    @apply opacity-100 visible;
+  }
+
+  /* ========================================
+     DROPDOWNS
+     ======================================== */
+  .dropdown-menu {
+    @apply absolute z-50 mt-2 min-w-[200px] origin-top-right
+           bg-white rounded-xl border border-gray-100 shadow-lg
+           p-2 focus:outline-none;
+  }
+
+  .dropdown-item {
+    @apply flex items-center gap-2 w-full px-3 py-2.5 text-sm text-gray-700
+           rounded-lg transition-colors
+           hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  .dropdown-item-danger {
+    @apply dropdown-item text-red-600 hover:bg-red-50 hover:text-red-700;
+  }
+
+  /* ========================================
+     AVATARS
+     ======================================== */
+  .avatar {
+    @apply inline-flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold;
+  }
+
+  .avatar-sm {
+    @apply w-8 h-8 text-xs;
+  }
+
+  .avatar-md {
+    @apply w-10 h-10 text-sm;
+  }
+
+  .avatar-lg {
+    @apply w-12 h-12 text-base;
+  }
+
+  .avatar-xl {
+    @apply w-16 h-16 text-lg;
+  }
+
+  /* ========================================
+     PROGRESS BARS
+     ======================================== */
+  .progress {
+    @apply w-full h-2 bg-gray-100 rounded-full overflow-hidden;
+  }
+
+  .progress-bar {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  .progress-bar-primary {
+    @apply progress-bar bg-gradient-to-r from-indigo-500 to-indigo-600;
+  }
+
+  .progress-bar-success {
+    @apply progress-bar bg-gradient-to-r from-emerald-500 to-emerald-600;
+  }
+
+  .progress-bar-warning {
+    @apply progress-bar bg-gradient-to-r from-amber-500 to-amber-600;
+  }
+
+  .progress-bar-danger {
+    @apply progress-bar bg-gradient-to-r from-red-500 to-red-600;
+  }
+
+  /* ========================================
+     DIVIDERS
+     ======================================== */
+  .divider {
+    @apply border-t border-gray-200 my-6;
+  }
+
+  .divider-text {
+    @apply flex items-center gap-4 my-6;
+  }
+
+  .divider-text::before,
+  .divider-text::after {
+    content: '';
+    @apply flex-1 border-t border-gray-200;
+  }
+
+  .divider-text span {
+    @apply text-sm text-gray-500 font-medium;
+  }
+
+  /* ========================================
+     EMPTY STATES
+     ======================================== */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 px-4 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200
+           flex items-center justify-center mb-6;
+  }
+
+  .empty-state-title {
+    @apply text-lg font-semibold text-gray-900 mb-2;
+  }
+
+  .empty-state-description {
+    @apply text-sm text-gray-500 max-w-sm mb-6;
+  }
+
+  /* ========================================
+     LOADING STATES
+     ======================================== */
+  .skeleton {
+    @apply animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200
+           bg-[length:200%_100%] rounded-lg;
+  }
+
+  .spinner {
+    @apply w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+
+  .spinner-lg {
+    @apply w-8 h-8 border-3;
+  }
+
+  /* ========================================
+     PAGE HEADERS
+     ======================================== */
+  .page-header {
+    @apply mb-8;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-gray-500 mt-1;
+  }
+
+  /* ========================================
+     FORM GROUPS
+     ======================================== */
+  .form-group {
+    @apply space-y-2;
+  }
+
+  .form-row {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .form-actions {
+    @apply flex items-center justify-end gap-3 pt-6 mt-6 border-t border-gray-100;
+  }
+
+  /* ========================================
+     ANIMATIONS
+     ======================================== */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.2s ease-out;
   }
 }
 
-/* Custom scrollbar */
+/* ========================================
+   CUSTOM SCROLLBAR
+   ======================================== */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -144,7 +709,15 @@
   @apply bg-gray-400;
 }
 
-/* React DatePicker custom styles */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+/* ========================================
+   REACT DATEPICKER CUSTOM STYLES
+   ======================================== */
 .react-datepicker-wrapper {
   width: 100%;
 }
@@ -153,9 +726,67 @@
   @apply input;
 }
 
-/* Chart.js responsive container */
+.react-datepicker {
+  @apply font-sans border-0 rounded-xl shadow-xl !important;
+}
+
+.react-datepicker__header {
+  @apply bg-white border-b border-gray-100 rounded-t-xl !important;
+}
+
+.react-datepicker__current-month {
+  @apply text-gray-900 font-semibold !important;
+}
+
+.react-datepicker__day-name {
+  @apply text-gray-500 font-medium !important;
+}
+
+.react-datepicker__day {
+  @apply rounded-lg hover:bg-indigo-50 !important;
+}
+
+.react-datepicker__day--selected {
+  @apply bg-indigo-600 hover:bg-indigo-700 !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  @apply bg-indigo-100 !important;
+}
+
+.react-datepicker__time-container {
+  @apply border-l border-gray-100 !important;
+}
+
+/* ========================================
+   HEADLESS UI OVERRIDES
+   ======================================== */
+[data-headlessui-state="open"] .transition-transform {
+  @apply rotate-180;
+}
+
+/* ========================================
+   CHART.JS RESPONSIVE CONTAINER
+   ======================================== */
 .chart-container {
   position: relative;
   height: 300px;
   width: 100%;
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    @apply bg-white;
+  }
+
+  .card {
+    @apply shadow-none border-gray-300;
+  }
 }

@@ -11,15 +11,19 @@ import {
   PencilIcon,
   TrashIcon,
   XMarkIcon,
+  BanknotesIcon,
+  BuildingStorefrontIcon,
+  WalletIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 import { useAccountsStore } from '../../store/useStore';
 import { Menu } from '@headlessui/react';
 
 const accountTypes = [
-  { value: 'personal', label: 'Personal' },
-  { value: 'negocio', label: 'Business' },
-  { value: 'ahorro', label: 'Savings' },
-  { value: 'compartida', label: 'Shared' },
+  { value: 'personal', label: 'Personal', icon: WalletIcon, color: 'from-blue-500 to-blue-600' },
+  { value: 'negocio', label: 'Business', icon: BuildingStorefrontIcon, color: 'from-purple-500 to-purple-600' },
+  { value: 'ahorro', label: 'Savings', icon: BanknotesIcon, color: 'from-emerald-500 to-emerald-600' },
+  { value: 'compartida', label: 'Shared', icon: UsersIcon, color: 'from-amber-500 to-amber-600' },
 ];
 
 const currencies = [
@@ -82,7 +86,6 @@ function Accounts() {
   const onSubmit = async (data) => {
     try {
       if (editingAccount) {
-        // Check if currency is changing
         const currencyChanging = data.moneda !== editingAccount.moneda;
 
         if (currencyChanging) {
@@ -131,67 +134,76 @@ function Accounts() {
     }).format(amount);
   };
 
-  const getAccountTypeLabel = (type) => {
-    return accountTypes.find((t) => t.value === type)?.label || type;
+  const getAccountType = (type) => {
+    return accountTypes.find((t) => t.value === type) || accountTypes[0];
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Accounts</h1>
-          <p className="text-gray-500 mt-1">Manage your financial accounts</p>
+        <div className="page-header mb-0">
+          <h1 className="page-title">Accounts</h1>
+          <p className="page-subtitle">Manage your financial accounts</p>
         </div>
         <button onClick={openCreateModal} className="btn-primary">
-          <PlusIcon className="h-5 w-5 mr-2" />
+          <PlusIcon className="h-5 w-5" />
           New Account
         </button>
       </div>
 
       {/* Accounts Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="card animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
-              <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
-              <div className="h-6 bg-gray-200 rounded w-1/3" />
+            <div key={i} className="card card-body">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="skeleton w-14 h-14 rounded-2xl" />
+                <div className="flex-1">
+                  <div className="skeleton h-5 w-3/4 mb-2" />
+                  <div className="skeleton h-4 w-1/2" />
+                </div>
+              </div>
+              <div className="skeleton h-8 w-1/2" />
             </div>
           ))}
         </div>
       ) : accounts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {accounts.map((account) => (
-            <div
-              key={account.id}
-              className="card hover:shadow-md transition-shadow group relative"
-            >
-              {/* Actions Menu */}
-              <Menu as="div" className="absolute top-4 right-4">
-                <Menu.Button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                    <div className="p-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {accounts.map((account) => {
+            const accountType = getAccountType(account.tipo);
+            const IconComponent = accountType.icon;
+
+            return (
+              <div
+                key={account.id}
+                className="card card-hover group relative overflow-hidden"
+              >
+                {/* Gradient decoration */}
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${accountType.color} opacity-5 rounded-full -translate-y-1/2 translate-x-1/2`} />
+
+                {/* Actions Menu */}
+                <Menu as="div" className="absolute top-4 right-4 z-10">
+                  <Menu.Button className="btn-icon-sm bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm">
+                    <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
+                  </Menu.Button>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="dropdown-menu">
                       <Menu.Item>
                         {({ active }) => (
                           <button
                             onClick={() => openEditModal(account)}
-                            className={`${
-                              active ? 'bg-gray-100' : ''
-                            } flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-700`}
+                            className={`dropdown-item ${active ? 'bg-gray-100' : ''}`}
                           >
-                            <PencilIcon className="h-4 w-4 mr-2" />
+                            <PencilIcon className="h-4 w-4" />
                             Edit
                           </button>
                         )}
@@ -200,61 +212,65 @@ function Accounts() {
                         {({ active }) => (
                           <button
                             onClick={() => setDeleteConfirm(account)}
-                            className={`${
-                              active ? 'bg-gray-100' : ''
-                            } flex w-full items-center rounded-md px-3 py-2 text-sm text-danger-600`}
+                            className={`dropdown-item-danger ${active ? 'bg-red-50' : ''}`}
                           >
-                            <TrashIcon className="h-4 w-4 mr-2" />
+                            <TrashIcon className="h-4 w-4" />
                             Archive
                           </button>
                         )}
                       </Menu.Item>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+
+                <Link to={`/accounts/${account.id}`} className="block p-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${accountType.color} flex items-center justify-center shadow-lg`}>
+                      <IconComponent className="h-7 w-7 text-white" />
                     </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
-
-              <Link to={`/accounts/${account.id}`} className="block">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
-                    <CreditCardIcon className="h-6 w-6 text-primary-600" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate text-lg">{account.nombre}</h3>
+                      <p className="text-sm text-gray-500">{accountType.label}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{account.nombre}</h3>
-                    <p className="text-sm text-gray-500">{getAccountTypeLabel(account.tipo)}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase">Balance</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      {account.balance
-                        ? formatCurrency(account.balance.saldo, account.moneda)
-                        : formatCurrency(0, account.moneda)}
-                    </p>
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Balance</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {account.balance
+                          ? formatCurrency(account.balance.saldo, account.moneda)
+                          : formatCurrency(0, account.moneda)}
+                      </p>
+                    </div>
+                    <span className="badge-primary">{account.rol}</span>
                   </div>
-                  <span className="badge-primary">{account.rol}</span>
-                </div>
 
-                {account.estado === 'archivada' && (
-                  <span className="mt-3 inline-block badge-gray">Archived</span>
-                )}
-              </Link>
-            </div>
-          ))}
+                  {account.estado === 'archivada' && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <span className="badge-gray">Archived</span>
+                    </div>
+                  )}
+                </Link>
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="card text-center py-12">
-          <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No accounts yet</h3>
-          <p className="text-gray-500 mb-4">
-            Create your first account to start tracking your finances.
-          </p>
-          <button onClick={openCreateModal} className="btn-primary">
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Create Account
-          </button>
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <CreditCardIcon className="h-10 w-10 text-gray-400" />
+            </div>
+            <h3 className="empty-state-title">No accounts yet</h3>
+            <p className="empty-state-description">
+              Create your first account to start tracking your finances and manage your money effectively.
+            </p>
+            <button onClick={openCreateModal} className="btn-primary">
+              <PlusIcon className="h-5 w-5" />
+              Create Account
+            </button>
+          </div>
         </div>
       )}
 
@@ -270,10 +286,10 @@ function Accounts() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="modal-overlay" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="modal-container">
             <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
@@ -284,88 +300,95 @@ function Accounts() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                  <div className="flex items-center justify-between mb-6">
-                    <Dialog.Title className="text-lg font-semibold text-gray-900">
+                <Dialog.Panel className="modal-panel">
+                  <div className="modal-header">
+                    <Dialog.Title className="modal-title">
                       {editingAccount ? 'Edit Account' : 'Create Account'}
                     </Dialog.Title>
                     <button
                       onClick={closeModal}
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="btn-icon-sm hover:bg-gray-100"
                     >
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
                   </div>
 
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div>
-                      <label htmlFor="nombre" className="label">
-                        Account Name
-                      </label>
-                      <input
-                        id="nombre"
-                        type="text"
-                        className={`input ${errors.nombre ? 'input-error' : ''}`}
-                        placeholder="e.g., Personal Checking"
-                        {...register('nombre', { required: 'Account name is required' })}
-                      />
-                      {errors.nombre && (
-                        <p className="mt-1 text-sm text-danger-600">{errors.nombre.message}</p>
-                      )}
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="modal-body space-y-5">
+                      <div className="form-group">
+                        <label htmlFor="nombre" className="label">
+                          Account Name
+                        </label>
+                        <input
+                          id="nombre"
+                          type="text"
+                          className={`input ${errors.nombre ? 'input-error' : ''}`}
+                          placeholder="e.g., Personal Checking"
+                          {...register('nombre', { required: 'Account name is required' })}
+                        />
+                        {errors.nombre && (
+                          <p className="error-text">{errors.nombre.message}</p>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="tipo" className="label">
+                          Account Type
+                        </label>
+                        <select
+                          id="tipo"
+                          className="select"
+                          {...register('tipo', { required: 'Account type is required' })}
+                        >
+                          {accountTypes.map((type) => (
+                            <option key={type.value} value={type.value}>
+                              {type.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="moneda" className="label">
+                          Currency
+                        </label>
+                        <select
+                          id="moneda"
+                          className="select"
+                          {...register('moneda')}
+                        >
+                          {currencies.map((currency) => (
+                            <option key={currency.value} value={currency.value}>
+                              {currency.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="tipo" className="label">
-                        Account Type
-                      </label>
-                      <select
-                        id="tipo"
-                        className="input"
-                        {...register('tipo', { required: 'Account type is required' })}
-                      >
-                        {accountTypes.map((type) => (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="moneda" className="label">
-                        Currency
-                      </label>
-                      <select
-                        id="moneda"
-                        className="input"
-                        {...register('moneda')}
-                      >
-                        {currencies.map((currency) => (
-                          <option key={currency.value} value={currency.value}>
-                            {currency.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
+                    <div className="modal-footer">
                       <button
                         type="button"
                         onClick={closeModal}
-                        className="btn-secondary flex-1"
+                        className="btn-secondary"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="btn-primary flex-1"
+                        className="btn-primary"
                       >
-                        {isSubmitting
-                          ? 'Saving...'
-                          : editingAccount
-                          ? 'Update'
-                          : 'Create'}
+                        {isSubmitting ? (
+                          <>
+                            <span className="spinner" />
+                            Saving...
+                          </>
+                        ) : editingAccount ? (
+                          'Update'
+                        ) : (
+                          'Create'
+                        )}
                       </button>
                     </div>
                   </form>
@@ -392,10 +415,10 @@ function Accounts() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="modal-overlay" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="modal-container">
             <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
@@ -406,24 +429,28 @@ function Accounts() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                  <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
-                    Archive Account
-                  </Dialog.Title>
-                  <p className="text-gray-600 mb-6">
-                    Are you sure you want to archive "{deleteConfirm?.nombre}"? You can still view
-                    it but won't be able to add new transactions.
-                  </p>
-                  <div className="flex gap-3">
+                <Dialog.Panel className="modal-panel max-w-sm">
+                  <div className="modal-body text-center">
+                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                      <TrashIcon className="h-8 w-8 text-red-600" />
+                    </div>
+                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">
+                      Archive Account
+                    </Dialog.Title>
+                    <p className="text-gray-600">
+                      Are you sure you want to archive <strong>"{deleteConfirm?.nombre}"</strong>? You can still view it but won't be able to add new transactions.
+                    </p>
+                  </div>
+                  <div className="modal-footer justify-center">
                     <button
                       onClick={() => setDeleteConfirm(null)}
-                      className="btn-secondary flex-1"
+                      className="btn-secondary"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => handleDelete(deleteConfirm.id)}
-                      className="btn-danger flex-1"
+                      className="btn-danger"
                     >
                       Archive
                     </button>

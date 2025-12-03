@@ -15,21 +15,22 @@ import {
   TrashIcon,
   CalendarIcon,
   FlagIcon,
+  ListBulletIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 import { useTasksStore, useCategoriesStore } from '../../store/useStore';
 
 const statusOptions = [
-  { value: 'pendiente', label: 'Pending', color: 'badge-warning', icon: ClockIcon },
-  { value: 'en_progreso', label: 'In Progress', color: 'badge-primary', icon: ExclamationCircleIcon },
-  { value: 'completada', label: 'Completed', color: 'badge-success', icon: CheckCircleIcon },
-  { value: 'cancelada', label: 'Cancelled', color: 'badge-gray', icon: XMarkIcon },
+  { value: 'pendiente', label: 'Pending', color: 'from-amber-500 to-amber-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700', icon: ClockIcon },
+  { value: 'en_progreso', label: 'In Progress', color: 'from-indigo-500 to-indigo-600', bgColor: 'bg-indigo-50', textColor: 'text-indigo-700', icon: ExclamationCircleIcon },
+  { value: 'completada', label: 'Completed', color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700', icon: CheckCircleIcon },
+  { value: 'cancelada', label: 'Cancelled', color: 'from-gray-400 to-gray-500', bgColor: 'bg-gray-50', textColor: 'text-gray-700', icon: XMarkIcon },
 ];
 
 const priorityOptions = [
-  { value: 'baja', label: 'Low', color: 'text-gray-500' },
-  { value: 'media', label: 'Medium', color: 'text-warning-500' },
-  { value: 'alta', label: 'High', color: 'text-danger-500' },
+  { value: 'baja', label: 'Low', color: 'text-gray-500', bgColor: 'bg-gray-100' },
+  { value: 'media', label: 'Medium', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  { value: 'alta', label: 'High', color: 'text-red-600', bgColor: 'bg-red-100' },
 ];
 
 function Tasks() {
@@ -47,7 +48,6 @@ function Tasks() {
 
   useEffect(() => {
     fetchTasks(accountId ? { accountId } : {});
-    // Only fetch categories if we have an account context
     if (accountId) {
       fetchCategories(accountId);
     }
@@ -119,7 +119,6 @@ function Tasks() {
   };
 
   const toggleComplete = async (task) => {
-    // Status flow: pendiente → en_progreso → completada → pendiente
     let newStatus;
     switch (task.estado) {
       case 'pendiente':
@@ -132,7 +131,7 @@ function Tasks() {
         newStatus = 'pendiente';
         break;
       case 'cancelada':
-        newStatus = 'pendiente'; // Reactivate cancelled task
+        newStatus = 'pendiente';
         break;
       default:
         newStatus = 'pendiente';
@@ -153,184 +152,228 @@ function Tasks() {
     return new Date(task.fechaVencimiento) < new Date();
   };
 
-  const TaskCard = ({ task }) => (
-    <div className={`p-4 bg-white rounded-lg border ${isOverdue(task) ? 'border-danger-300 bg-danger-50' : 'border-gray-200'} group overflow-visible`}>
-      <div className="flex items-start gap-3">
-        {task.estado === 'completada' ? (
-          <div className="mt-0.5 flex-shrink-0 text-success-500">
-            <CheckCircleSolidIcon className="h-6 w-6" />
-          </div>
-        ) : (
-          <button
-            onClick={() => toggleComplete(task)}
-            className={`mt-0.5 flex-shrink-0 transition-colors ${
-              task.estado === 'en_progreso'
-                ? 'text-primary-500 hover:text-success-500'
-                : 'text-gray-300 hover:text-primary-500'
-            }`}
-            title={
-              task.estado === 'pendiente'
-                ? 'Click to start (In Progress)'
-                : 'Click to complete'
-            }
-          >
-            {task.estado === 'en_progreso' ? (
-              <ClockIcon className="h-6 w-6" />
-            ) : (
-              <CheckCircleIcon className="h-6 w-6" />
-            )}
-          </button>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <h4 className={`font-medium ${task.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-              {task.titulo}
-            </h4>
-            <Menu as="div" className="relative">
-              <Menu.Button className="p-1 rounded hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
-                <EllipsisVerticalIcon className="h-5 w-5 text-gray-400" />
-              </Menu.Button>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                  {task.estado !== 'completada' && (
+  const TaskCard = ({ task }) => {
+    const priority = priorityOptions.find(p => p.value === task.prioridad);
+
+    return (
+      <div className={`card card-hover p-5 group overflow-visible ${isOverdue(task) ? 'border-red-200 bg-red-50/30' : ''}`}>
+        <div className="flex items-start gap-4">
+          {task.estado === 'completada' ? (
+            <button
+              onClick={() => toggleComplete(task)}
+              className="mt-0.5 flex-shrink-0 text-emerald-500 hover:text-emerald-600 transition-colors"
+            >
+              <CheckCircleSolidIcon className="h-6 w-6" />
+            </button>
+          ) : (
+            <button
+              onClick={() => toggleComplete(task)}
+              className={`mt-0.5 flex-shrink-0 transition-all ${
+                task.estado === 'en_progreso'
+                  ? 'text-indigo-500 hover:text-emerald-500'
+                  : 'text-gray-300 hover:text-indigo-500'
+              }`}
+              title={
+                task.estado === 'pendiente'
+                  ? 'Click to start (In Progress)'
+                  : 'Click to complete'
+              }
+            >
+              {task.estado === 'en_progreso' ? (
+                <div className="relative">
+                  <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-25" />
+                  <ClockIcon className="h-6 w-6 relative" />
+                </div>
+              ) : (
+                <CheckCircleIcon className="h-6 w-6" />
+              )}
+            </button>
+          )}
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h4 className={`font-semibold ${task.estado === 'completada' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                {task.titulo}
+              </h4>
+              <Menu as="div" className="relative">
+                <Menu.Button className="btn-icon-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100">
+                  <EllipsisVerticalIcon className="h-5 w-5 text-gray-400" />
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="dropdown-menu">
+                    {task.estado !== 'completada' && (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={() => openEditModal(task)}
+                            className={`dropdown-item ${active ? 'bg-gray-100' : ''}`}
+                          >
+                            <PencilIcon className="h-4 w-4" /> Edit
+                          </button>
+                        )}
+                      </Menu.Item>
+                    )}
                     <Menu.Item>
                       {({ active }) => (
                         <button
-                          onClick={() => openEditModal(task)}
-                          className={`${active ? 'bg-gray-50' : ''} flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700`}
+                          onClick={() => setDeleteConfirm(task)}
+                          className={`dropdown-item-danger ${active ? 'bg-red-50' : ''}`}
                         >
-                          <PencilIcon className="h-4 w-4" /> Edit
+                          <TrashIcon className="h-4 w-4" /> Delete
                         </button>
                       )}
                     </Menu.Item>
-                  )}
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        onClick={() => setDeleteConfirm(task)}
-                        className={`${active ? 'bg-gray-50' : ''} flex items-center gap-2 w-full px-4 py-2 text-sm text-danger-600`}
-                      >
-                        <TrashIcon className="h-4 w-4" /> Delete
-                      </button>
-                    )}
-                  </Menu.Item>
-                </Menu.Items>
-              </Transition>
-            </Menu>
-          </div>
-          {task.descripcion && (
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{task.descripcion}</p>
-          )}
-          <div className="flex items-center gap-3 mt-3 flex-wrap">
-            <span className={`text-xs font-medium flex items-center gap-1 ${priorityOptions.find(p => p.value === task.prioridad)?.color}`}>
-              <FlagIcon className="h-3 w-3" />
-              {priorityOptions.find(p => p.value === task.prioridad)?.label}
-            </span>
-            {task.fechaVencimiento && (
-              <span className={`text-xs flex items-center gap-1 ${isOverdue(task) ? 'text-danger-600' : 'text-gray-500'}`}>
-                <CalendarIcon className="h-3 w-3" />
-                {new Date(task.fechaVencimiento).toLocaleDateString()}
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
+
+            {task.descripcion && (
+              <p className="text-sm text-gray-500 mt-1.5 line-clamp-2">{task.descripcion}</p>
+            )}
+
+            <div className="flex items-center gap-2 mt-4 flex-wrap">
+              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${priority?.bgColor} ${priority?.color}`}>
+                <FlagIcon className="h-3 w-3" />
+                {priority?.label}
               </span>
-            )}
-            {task.categoria && (
-              <span className="badge-gray text-xs">{task.categoria.nombre}</span>
-            )}
+              {task.fechaVencimiento && (
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${isOverdue(task) ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
+                  <CalendarIcon className="h-3 w-3" />
+                  {new Date(task.fechaVencimiento).toLocaleDateString()}
+                </span>
+              )}
+              {task.categoria && (
+                <span className="badge-purple text-xs">{task.categoria.nombre}</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const ColumnHeader = ({ status, count }) => {
+    const StatusIcon = status.icon;
+    return (
+      <div className={`flex items-center gap-3 mb-4 p-3 rounded-xl ${status.bgColor}`}>
+        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${status.color} flex items-center justify-center shadow-sm`}>
+          <StatusIcon className="h-4 w-4 text-white" />
+        </div>
+        <div>
+          <h3 className={`font-semibold ${status.textColor}`}>{status.label}</h3>
+          <p className="text-xs text-gray-500">{count} task{count !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
-          <p className="text-gray-500 mt-1">Manage your financial to-dos</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="page-header mb-0">
+          <h1 className="page-title">Tasks</h1>
+          <p className="page-subtitle">Manage your financial to-dos</p>
         </div>
         <button onClick={openCreateModal} className="btn-primary">
-          <PlusIcon className="h-5 w-5 mr-2" />
+          <PlusIcon className="h-5 w-5" />
           New Task
         </button>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        <button
-          onClick={() => setFilterStatus('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-            filterStatus === 'all' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          All ({tasks.length})
-        </button>
-        {statusOptions.map(status => (
+      <div className="card card-body p-2">
+        <div className="flex gap-2 overflow-x-auto">
           <button
-            key={status.value}
-            onClick={() => setFilterStatus(status.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              filterStatus === status.value ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            onClick={() => setFilterStatus('all')}
+            className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+              filterStatus === 'all'
+                ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            {status.label} ({tasks.filter(t => t.estado === status.value).length})
+            All Tasks ({tasks.length})
           </button>
-        ))}
+          {statusOptions.map(status => {
+            const StatusIcon = status.icon;
+            return (
+              <button
+                key={status.value}
+                onClick={() => setFilterStatus(status.value)}
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
+                  filterStatus === status.value
+                    ? `bg-gradient-to-r ${status.color} text-white shadow-lg`
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <StatusIcon className="h-4 w-4" />
+                {status.label} ({tasks.filter(t => t.estado === status.value).length})
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Task Lists */}
       {isLoading ? (
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map(i => <div key={i} className="h-24 bg-gray-200 rounded-lg" />)}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="space-y-4">
+              <div className="skeleton h-16 rounded-xl" />
+              <div className="skeleton h-32 rounded-xl" />
+              <div className="skeleton h-32 rounded-xl" />
+            </div>
+          ))}
         </div>
       ) : filterStatus === 'all' ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Pending Column */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <ClockIcon className="h-5 w-5 text-warning-500" />
-              <h3 className="font-semibold text-gray-900">Pending ({pendingTasks.length})</h3>
-            </div>
+          <div>
+            <ColumnHeader status={statusOptions[0]} count={pendingTasks.length} />
             <div className="space-y-3">
               {pendingTasks.map(task => <TaskCard key={task.id} task={task} />)}
               {pendingTasks.length === 0 && (
-                <p className="text-center text-gray-400 py-8 bg-gray-50 rounded-lg">No pending tasks</p>
+                <div className="card card-body text-center py-12">
+                  <ClockIcon className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-400 text-sm">No pending tasks</p>
+                </div>
               )}
             </div>
           </div>
 
           {/* In Progress Column */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <ExclamationCircleIcon className="h-5 w-5 text-primary-500" />
-              <h3 className="font-semibold text-gray-900">In Progress ({inProgressTasks.length})</h3>
-            </div>
+          <div>
+            <ColumnHeader status={statusOptions[1]} count={inProgressTasks.length} />
             <div className="space-y-3">
               {inProgressTasks.map(task => <TaskCard key={task.id} task={task} />)}
               {inProgressTasks.length === 0 && (
-                <p className="text-center text-gray-400 py-8 bg-gray-50 rounded-lg">No tasks in progress</p>
+                <div className="card card-body text-center py-12">
+                  <ExclamationCircleIcon className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-400 text-sm">No tasks in progress</p>
+                </div>
               )}
             </div>
           </div>
 
           {/* Completed Column */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <CheckCircleIcon className="h-5 w-5 text-success-500" />
-              <h3 className="font-semibold text-gray-900">Completed ({completedTasks.length})</h3>
-            </div>
+          <div>
+            <ColumnHeader status={statusOptions[2]} count={completedTasks.length} />
             <div className="space-y-3">
               {completedTasks.map(task => <TaskCard key={task.id} task={task} />)}
               {completedTasks.length === 0 && (
-                <p className="text-center text-gray-400 py-8 bg-gray-50 rounded-lg">No completed tasks</p>
+                <div className="card card-body text-center py-12">
+                  <CheckCircleIcon className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-400 text-sm">No completed tasks</p>
+                </div>
               )}
             </div>
           </div>
@@ -339,7 +382,17 @@ function Tasks() {
         <div className="space-y-3">
           {filteredTasks.map(task => <TaskCard key={task.id} task={task} />)}
           {filteredTasks.length === 0 && (
-            <p className="text-center text-gray-500 py-12">No tasks found</p>
+            <div className="card">
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <ListBulletIcon className="h-10 w-10 text-gray-400" />
+                </div>
+                <h3 className="empty-state-title">No tasks found</h3>
+                <p className="empty-state-description">
+                  There are no tasks matching the selected filter.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -356,10 +409,10 @@ function Tasks() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="modal-overlay" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="modal-container">
             <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
@@ -370,90 +423,99 @@ function Tasks() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
-                  <div className="flex items-center justify-between mb-6">
-                    <Dialog.Title className="text-lg font-semibold">
+                <Dialog.Panel className="modal-panel">
+                  <div className="modal-header">
+                    <Dialog.Title className="modal-title">
                       {editingTask ? 'Edit Task' : 'New Task'}
                     </Dialog.Title>
-                    <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-lg">
-                      <XMarkIcon className="h-5 w-5" />
+                    <button onClick={closeModal} className="btn-icon-sm hover:bg-gray-100">
+                      <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
                   </div>
 
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div>
-                      <label className="label">Title</label>
-                      <input
-                        type="text"
-                        className={`input ${errors.titulo ? 'input-error' : ''}`}
-                        placeholder="Task title"
-                        {...register('titulo', { required: 'Title is required' })}
-                      />
-                      {errors.titulo && (
-                        <p className="mt-1 text-sm text-danger-600">{errors.titulo.message}</p>
+                  <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="modal-body space-y-5">
+                      <div className="form-group">
+                        <label className="label">Title</label>
+                        <input
+                          type="text"
+                          className={`input ${errors.titulo ? 'input-error' : ''}`}
+                          placeholder="Task title"
+                          {...register('titulo', { required: 'Title is required' })}
+                        />
+                        {errors.titulo && (
+                          <p className="error-text">{errors.titulo.message}</p>
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label className="label">Description</label>
+                        <textarea
+                          className="textarea"
+                          rows={3}
+                          placeholder="Optional description"
+                          {...register('descripcion')}
+                        />
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="label">Priority</label>
+                          <select className="select" {...register('prioridad')}>
+                            {priorityOptions.map(p => (
+                              <option key={p.value} value={p.value}>{p.label}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="label">Status</label>
+                          <select className="select" {...register('estado')}>
+                            {statusOptions.map(s => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="label">Due Date</label>
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={setSelectedDate}
+                          className="input w-full"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="Select due date"
+                          isClearable
+                        />
+                      </div>
+
+                      {accountId && categories.length > 0 && (
+                        <div className="form-group">
+                          <label className="label">Category (optional)</label>
+                          <select className="select" {...register('categoria_id')}>
+                            <option value="">No category</option>
+                            {categories.map(c => (
+                              <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                          </select>
+                        </div>
                       )}
                     </div>
 
-                    <div>
-                      <label className="label">Description</label>
-                      <textarea
-                        className="input"
-                        rows={3}
-                        placeholder="Optional description"
-                        {...register('descripcion')}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="label">Priority</label>
-                        <select className="input" {...register('prioridad')}>
-                          {priorityOptions.map(p => (
-                            <option key={p.value} value={p.value}>{p.label}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="label">Status</label>
-                        <select className="input" {...register('estado')}>
-                          {statusOptions.map(s => (
-                            <option key={s.value} value={s.value}>{s.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="label">Due Date</label>
-                      <DatePicker
-                        selected={selectedDate}
-                        onChange={setSelectedDate}
-                        className="input w-full"
-                        dateFormat="yyyy-MM-dd"
-                        placeholderText="Select due date"
-                        isClearable
-                      />
-                    </div>
-
-                    {accountId && categories.length > 0 && (
-                      <div>
-                        <label className="label">Category (optional)</label>
-                        <select className="input" {...register('categoria_id')}>
-                          <option value="">No category</option>
-                          {categories.map(c => (
-                            <option key={c.id} value={c.id}>{c.nombre}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-4">
-                      <button type="button" onClick={closeModal} className="btn-secondary flex-1">
+                    <div className="modal-footer">
+                      <button type="button" onClick={closeModal} className="btn-secondary">
                         Cancel
                       </button>
-                      <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">
-                        {isSubmitting ? 'Saving...' : 'Save'}
+                      <button type="submit" disabled={isSubmitting} className="btn-primary">
+                        {isSubmitting ? (
+                          <>
+                            <span className="spinner" />
+                            Saving...
+                          </>
+                        ) : (
+                          'Save'
+                        )}
                       </button>
                     </div>
                   </form>
@@ -476,10 +538,10 @@ function Tasks() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="modal-overlay" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="modal-container">
             <div className="flex min-h-full items-center justify-center p-4">
               <Transition.Child
                 as={Fragment}
@@ -490,16 +552,23 @@ function Tasks() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 shadow-xl">
-                  <Dialog.Title className="text-lg font-semibold mb-4">Delete Task</Dialog.Title>
-                  <p className="text-gray-600 mb-6">
-                    Delete "{deleteConfirm?.titulo}"? This action cannot be undone.
-                  </p>
-                  <div className="flex gap-3">
-                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1">
+                <Dialog.Panel className="modal-panel max-w-sm">
+                  <div className="modal-body text-center">
+                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                      <TrashIcon className="h-8 w-8 text-red-600" />
+                    </div>
+                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">
+                      Delete Task
+                    </Dialog.Title>
+                    <p className="text-gray-600">
+                      Delete <strong>"{deleteConfirm?.titulo}"</strong>? This action cannot be undone.
+                    </p>
+                  </div>
+                  <div className="modal-footer justify-center">
+                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">
                       Cancel
                     </button>
-                    <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-danger flex-1">
+                    <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-danger">
                       Delete
                     </button>
                   </div>

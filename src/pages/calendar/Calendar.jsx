@@ -424,7 +424,7 @@ function Calendar() {
         <div className="space-y-6">
           {/* Upcoming Events */}
           <div className="card">
-            <h3 className="card-title mb-4">Upcoming Events</h3>
+            <h3 className="card-title mb-4 pt-2 pl-2">Upcoming Events</h3>
             <div className="space-y-3">
               {(events ?? [])
                 .filter(Boolean)

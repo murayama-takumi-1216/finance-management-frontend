@@ -577,6 +577,19 @@ export const useEventsStore = create((set, get) => ({
     }
   },
 
+  // Fetch all user reminders (for alarm system)
+  fetchAllReminders: async () => {
+    try {
+      const { data } = await remindersAPI.getAllUserReminders();
+      const reminders = Array.isArray(data) ? data : (data.reminders || []);
+      set({ reminders });
+      return reminders;
+    } catch (error) {
+      console.error('Failed to fetch all reminders:', error);
+      return [];
+    }
+  },
+
   createReminder: async (accountId, reminderData) => {
     try {
       const { data } = await remindersAPI.createForAccount(accountId, reminderData);

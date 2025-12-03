@@ -60,6 +60,7 @@ function Calendar() {
   const [eventDate, setEventDate] = useState(new Date());
   const [reminderDate, setReminderDate] = useState(new Date());
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteReminderConfirm, setDeleteReminderConfirm] = useState(null);
   const [selectedReminderSound, setSelectedReminderSound] = useState('default');
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm();
@@ -241,6 +242,7 @@ function Calendar() {
     try {
       await deleteReminder(accountId, reminderId);
       toast.success('Recordatorio eliminado');
+      setDeleteReminderConfirm(null);
     } catch (error) {
       toast.error('Error al eliminar recordatorio');
     }
@@ -442,7 +444,7 @@ function Calendar() {
                         </p>
                       </div>
                       <button
-                        onClick={() => handleDeleteReminder(reminder.id)}
+                        onClick={() => setDeleteReminderConfirm(reminder)}
                         className="btn-icon-sm hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <TrashIcon className="h-3.5 w-3.5 text-red-500" />
@@ -705,7 +707,7 @@ function Calendar() {
         </Dialog>
       </Transition>
 
-      {/* Delete Confirmation */}
+      {/* Delete Event Confirmation */}
       <Transition appear show={!!deleteConfirm} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setDeleteConfirm(null)}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
@@ -725,6 +727,34 @@ function Calendar() {
                   <div className="modal-footer justify-center">
                     <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancelar</button>
                     <button onClick={() => handleDeleteEvent(deleteConfirm.id)} className="btn-danger">Eliminar</button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Delete Reminder Confirmation */}
+      <Transition appear show={!!deleteReminderConfirm} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setDeleteReminderConfirm(null)}>
+          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="modal-overlay" />
+          </Transition.Child>
+          <div className="modal-container">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                <Dialog.Panel className="modal-panel max-w-sm">
+                  <div className="modal-body text-center">
+                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                      <TrashIcon className="h-8 w-8 text-red-600" />
+                    </div>
+                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">Eliminar Recordatorio</Dialog.Title>
+                    <p className="text-gray-600">¿Eliminar "{deleteReminderConfirm?.mensaje}"? Esta acción no se puede deshacer.</p>
+                  </div>
+                  <div className="modal-footer justify-center">
+                    <button onClick={() => setDeleteReminderConfirm(null)} className="btn-secondary">Cancelar</button>
+                    <button onClick={() => handleDeleteReminder(deleteReminderConfirm.id)} className="btn-danger">Eliminar</button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

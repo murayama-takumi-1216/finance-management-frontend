@@ -163,6 +163,8 @@ export const remindersAPI = {
   getByAccount: (accountId) => api.get(`/accounts/${accountId}/reminders`),
   createForAccount: (accountId, data) => api.post(`/accounts/${accountId}/reminders`, data),
   deleteForAccount: (accountId, reminderId) => api.delete(`/accounts/${accountId}/reminders/${reminderId}`),
+  // Get all user reminders (for alarm system)
+  getAllUserReminders: () => api.get('/reminders'),
 };
 
 // Calendar Integrations API

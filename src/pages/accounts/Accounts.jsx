@@ -177,7 +177,7 @@ function Accounts() {
             return (
               <div
                 key={account.id}
-                className="card card-hover group relative"
+                className="card card-hover group relative overflow-visible"
               >
                 {/* Gradient decoration */}
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${accountType.color} opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none`} />

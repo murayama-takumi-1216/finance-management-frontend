@@ -205,7 +205,7 @@ function Tasks() {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="dropdown-menu">
+                  <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none py-2 z-50">
                     {task.estado !== 'completada' && (
                       <Menu.Item>
                         {({ active }) => (

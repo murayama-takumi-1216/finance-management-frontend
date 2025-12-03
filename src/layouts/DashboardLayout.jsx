@@ -25,7 +25,8 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore, useAccountsStore, useUIStore } from '../store/useStore';
-import NotificationBell from '../components/NotificationBell';
+import AlarmModal from '../components/AlarmModal';
+import { useReminderAlarm } from '../hooks/useReminderAlarm';
 
 const mainNavItems = [
   { name: 'Panel', href: '/dashboard', icon: HomeIcon, color: 'indigo' },
@@ -52,6 +53,9 @@ function DashboardLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { accountId } = useParams();
+
+  // Reminder alarm system
+  const { activeAlarm, dismissAlarm, snoozeAlarm } = useReminderAlarm();
 
   useEffect(() => {
     fetchAccounts();
@@ -269,9 +273,6 @@ function DashboardLayout() {
 
             {/* Right side */}
             <div className="flex items-center gap-x-3">
-              {/* Notification Bell */}
-              <NotificationBell />
-
               {/* User menu */}
               <Menu as="div" className="relative">
                 <Menu.Button className="flex items-center gap-3 p-1.5 pr-3 rounded-xl hover:bg-gray-100 transition-colors">
@@ -342,6 +343,14 @@ function DashboardLayout() {
           </div>
         </main>
       </div>
+
+      {/* Reminder Alarm Modal */}
+      <AlarmModal
+        isOpen={!!activeAlarm}
+        onClose={dismissAlarm}
+        onSnooze={snoozeAlarm}
+        reminder={activeAlarm}
+      />
     </div>
   );
 }

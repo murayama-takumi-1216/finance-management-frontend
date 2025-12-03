@@ -41,18 +41,25 @@ ChartJS.register(
 );
 
 const periodOptions = [
-  { value: 'week', label: 'This Week' },
-  { value: 'month', label: 'This Month' },
-  { value: 'quarter', label: 'This Quarter' },
-  { value: 'year', label: 'This Year' },
-  { value: 'custom', label: 'Custom Range' },
+  { value: 'week', label: 'Esta Semana' },
+  { value: 'month', label: 'Este Mes' },
+  { value: 'quarter', label: 'Este Trimestre' },
+  { value: 'year', label: 'Este Año' },
+  { value: 'custom', label: 'Rango Personalizado' },
 ];
 
 const tabs = [
-  { id: 'overview', label: 'Overview', icon: ChartBarIcon },
-  { id: 'categories', label: 'Categories', icon: ChartPieIcon },
-  { id: 'trends', label: 'Trends', icon: PresentationChartLineIcon },
-  { id: 'providers', label: 'Providers', icon: BuildingStorefrontIcon },
+  { id: 'overview', label: 'Resumen', icon: ChartBarIcon },
+  { id: 'categories', label: 'Categorías', icon: ChartPieIcon },
+  { id: 'trends', label: 'Tendencias', icon: PresentationChartLineIcon },
+  { id: 'providers', label: 'Proveedores', icon: BuildingStorefrontIcon },
+];
+
+const trendsGranularityOptions = [
+  { value: 'daily', label: 'Diario', days: 30 },
+  { value: 'weekly', label: 'Semanal', days: 90 },
+  { value: 'monthly', label: 'Mensual', days: 365 },
+  { value: 'quarterly', label: 'Trimestral', days: 730 },
 ];
 
 function Reports() {
@@ -70,6 +77,8 @@ function Reports() {
   const [topCategories, setTopCategories] = useState([]);
   const [comparison, setComparison] = useState(null);
   const [spendingByProvider, setSpendingByProvider] = useState([]);
+  const [trendsGranularity, setTrendsGranularity] = useState('monthly');
+  const [isLoadingTrends, setIsLoadingTrends] = useState(false);
 
   useEffect(() => {
     loadReports();
@@ -124,7 +133,6 @@ function Reports() {
         totalsRes,
         expensesRes,
         incomeRes,
-        trendsRes,
         topRes,
         comparisonRes,
         providerRes,
@@ -132,7 +140,6 @@ function Reports() {
         reportsAPI.getTotals(accountId, { start, end }),
         reportsAPI.getExpensesByCategory(accountId, { start, end }),
         reportsAPI.getIncomeByCategory(accountId, { start, end }),
-        reportsAPI.getMonthlyTrends(accountId, { months: 12 }),
         reportsAPI.getTopCategories(accountId, { start, end, limit: 5 }),
         reportsAPI.comparePeriods(accountId, {
           periodo1_inicio: start,
@@ -153,14 +160,6 @@ function Reports() {
 
       setExpensesByCategory(expensesRes.data?.categories || expensesRes.data || []);
       setIncomeByCategory(incomeRes.data?.categories || incomeRes.data || []);
-
-      const trendsData = trendsRes.data?.trends || trendsRes.data || [];
-      setMonthlyTrends(trendsData.map(t => ({
-        mes: t.periodo,
-        ingresos: t.ingresos,
-        gastos: t.gastos,
-        num_movimientos: t.numMovimientos
-      })));
 
       const topCatData = topRes.data?.ranking || topRes.data || [];
       const topCatType = topRes.data?.tipo || 'gasto';
@@ -191,6 +190,52 @@ function Reports() {
       setIsLoading(false);
     }
   };
+
+  // Load trends data based on granularity
+  const loadTrendsData = async (granularity) => {
+    setIsLoadingTrends(true);
+    try {
+      const granularityConfig = trendsGranularityOptions.find(g => g.value === granularity);
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - granularityConfig.days);
+
+      // Map granularity to API parameter
+      const agrupacionMap = {
+        daily: 'dia',
+        weekly: 'semana',
+        monthly: 'mes',
+        quarterly: 'trimestre'
+      };
+
+      const params = {
+        start: startDate.toISOString().split('T')[0],
+        end: endDate.toISOString().split('T')[0],
+        agrupacion: agrupacionMap[granularity] || 'mes',
+      };
+
+      const response = await reportsAPI.getIncomeVsExpenses(accountId, params);
+      // API returns { series: [...], totales: {...}, agrupacion: '...', periodo: {...} }
+      const data = response.data?.series || [];
+
+      setMonthlyTrends(data.map(t => ({
+        mes: t.periodo,
+        ingresos: t.ingresos || 0,
+        gastos: t.gastos || 0,
+        num_movimientos: t.numMovimientos || 0
+      })));
+    } catch (error) {
+      console.error('Failed to load trends:', error);
+    } finally {
+      setIsLoadingTrends(false);
+    }
+  };
+
+  useEffect(() => {
+    if (accountId) {
+      loadTrendsData(trendsGranularity);
+    }
+  }, [accountId, trendsGranularity]);
 
   const formatCurrency = (amount) => {
     const currency = currentAccount?.moneda || 'USD';
@@ -232,7 +277,7 @@ function Reports() {
     labels: monthlyTrends.map(t => t.mes),
     datasets: [
       {
-        label: 'Income',
+        label: 'Ingresos',
         data: monthlyTrends.map(t => parseFloat(t.ingresos)),
         borderColor: '#22C55E',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -242,7 +287,7 @@ function Reports() {
         pointBackgroundColor: '#22C55E',
       },
       {
-        label: 'Expenses',
+        label: 'Gastos',
         data: monthlyTrends.map(t => parseFloat(t.gastos)),
         borderColor: '#EF4444',
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -255,9 +300,9 @@ function Reports() {
   };
 
   const providerChartData = {
-    labels: spendingByProvider.map(p => p.proveedor || 'Unknown'),
+    labels: spendingByProvider.map(p => p.proveedor || 'Desconocido'),
     datasets: [{
-      label: 'Spending',
+      label: 'Gastos',
       data: spendingByProvider.map(p => parseFloat(p.total)),
       backgroundColor: 'rgba(99, 102, 241, 0.8)',
       borderRadius: 8,
@@ -309,8 +354,8 @@ function Reports() {
               <ChartBarIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="page-title">Reports</h1>
-              <p className="page-subtitle">Financial analytics and insights</p>
+              <h1 className="page-title">Reportes</h1>
+              <p className="page-subtitle">Análisis e información financiera</p>
             </div>
           </div>
         </div>
@@ -351,7 +396,7 @@ function Reports() {
               <BanknotesIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Net Balance</p>
+              <p className="text-sm text-gray-500 font-medium">Balance Neto</p>
               <p className={`text-2xl font-bold ${totals?.balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                 {formatCurrency(totals?.balance)}
               </p>
@@ -365,11 +410,11 @@ function Reports() {
               <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Total Income</p>
+              <p className="text-sm text-gray-500 font-medium">Total Ingresos</p>
               <p className="text-2xl font-bold text-emerald-600">{formatCurrency(totals?.ingresos)}</p>
               {comparison && (
                 <p className={`text-xs mt-0.5 ${comparison.cambio_ingresos >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {formatPercent(comparison.cambio_ingresos)} vs last
+                  {formatPercent(comparison.cambio_ingresos)} vs anterior
                 </p>
               )}
             </div>
@@ -382,11 +427,11 @@ function Reports() {
               <ArrowTrendingDownIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Total Expenses</p>
+              <p className="text-sm text-gray-500 font-medium">Total Gastos</p>
               <p className="text-2xl font-bold text-red-600">{formatCurrency(totals?.gastos)}</p>
               {comparison && (
                 <p className={`text-xs mt-0.5 ${comparison.cambio_gastos <= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {formatPercent(comparison.cambio_gastos)} vs last
+                  {formatPercent(comparison.cambio_gastos)} vs anterior
                 </p>
               )}
             </div>
@@ -399,7 +444,7 @@ function Reports() {
               <CalendarDaysIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 font-medium">Transactions</p>
+              <p className="text-sm text-gray-500 font-medium">Transacciones</p>
               <p className="text-2xl font-bold text-gray-900">{totals?.numMovimientos || 0}</p>
             </div>
           </div>
@@ -433,14 +478,38 @@ function Reports() {
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card card-body">
-            <h3 className="card-title mb-6">Monthly Trends</h3>
-            <div className="h-80">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h3 className="card-title mb-0">
+                Tendencias {trendsGranularity === 'daily' ? 'Diarias' : trendsGranularity === 'weekly' ? 'Semanales' : trendsGranularity === 'quarterly' ? 'Trimestrales' : 'Mensuales'}
+              </h3>
+              <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
+                {trendsGranularityOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setTrendsGranularity(opt.value)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                      trendsGranularity === opt.value
+                        ? 'bg-white text-indigo-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="h-80 relative">
+              {isLoadingTrends && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-xl">
+                  <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                </div>
+              )}
               <Line data={trendsChartData} options={chartOptions} />
             </div>
           </div>
 
           <div className="card card-body">
-            <h3 className="card-title mb-6">Top Expense Categories</h3>
+            <h3 className="card-title mb-6">Categorías de Gastos Principales</h3>
             <div className="space-y-4">
               {topCategories.filter(c => c.tipo === 'gasto').slice(0, 5).map((cat, idx) => (
                 <div key={cat.categoria} className="flex items-center gap-3">
@@ -463,17 +532,17 @@ function Reports() {
                 </div>
               ))}
               {topCategories.filter(c => c.tipo === 'gasto').length === 0 && (
-                <div className="text-center py-8 text-gray-500">No expense data for this period</div>
+                <div className="text-center py-8 text-gray-500">Sin datos de gastos para este período</div>
               )}
             </div>
           </div>
 
           {comparison && (
             <div className="card card-body lg:col-span-2">
-              <h3 className="card-title mb-6">Period Comparison</h3>
+              <h3 className="card-title mb-6">Comparación de Períodos</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center p-6 bg-gray-50 rounded-2xl">
-                  <p className="text-sm text-gray-500 mb-2 font-medium">Previous Period</p>
+                  <p className="text-sm text-gray-500 mb-2 font-medium">Período Anterior</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(comparison.periodo2?.ingresos - comparison.periodo2?.gastos)}
                   </p>
@@ -482,16 +551,16 @@ function Reports() {
                     <span className="text-red-600">-{formatCurrency(comparison.periodo2?.gastos)}</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center bg-gray-100 rounded-2xl">
                   <div className="text-center">
                     <p className={`text-4xl font-bold ${comparison.cambio_balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                       {formatPercent(comparison.cambio_balance)}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">Change</p>
+                    <p className="text-sm text-gray-500 mt-1">Cambio</p>
                   </div>
                 </div>
                 <div className="text-center p-6 bg-indigo-50 rounded-2xl">
-                  <p className="text-sm text-gray-500 mb-2 font-medium">Current Period</p>
+                  <p className="text-sm text-gray-500 mb-2 font-medium">Período Actual</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(comparison.periodo1?.ingresos - comparison.periodo1?.gastos)}
                   </p>
@@ -510,44 +579,44 @@ function Reports() {
       {activeTab === 'categories' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card card-body">
-            <h3 className="card-title mb-6">Expenses by Category</h3>
+            <h3 className="card-title mb-6">Gastos por Categoría</h3>
             {expensesByCategory.length > 0 ? (
               <div className="h-80">
                 <Doughnut data={expenseChartData} options={chartOptions} />
               </div>
             ) : (
               <div className="h-80 flex items-center justify-center text-gray-500">
-                No expense data for this period
+                Sin datos de gastos para este período
               </div>
             )}
           </div>
 
           <div className="card card-body">
-            <h3 className="card-title mb-6">Income by Category</h3>
+            <h3 className="card-title mb-6">Ingresos por Categoría</h3>
             {incomeByCategory.length > 0 ? (
               <div className="h-80">
                 <Doughnut data={incomeChartData} options={chartOptions} />
               </div>
             ) : (
               <div className="h-80 flex items-center justify-center text-gray-500">
-                No income data for this period
+                Sin datos de ingresos para este período
               </div>
             )}
           </div>
 
           <div className="card lg:col-span-2">
             <div className="card-header px-6 py-4 border-b border-gray-100">
-              <h3 className="card-title mb-0">Category Details</h3>
+              <h3 className="card-title mb-0">Detalles de Categorías</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Category</th>
-                    <th>Type</th>
+                    <th>Categoría</th>
+                    <th>Tipo</th>
                     <th className="text-right">Total</th>
-                    <th className="text-right">Transactions</th>
-                    <th className="text-right">Average</th>
+                    <th className="text-right">Transacciones</th>
+                    <th className="text-right">Promedio</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -556,7 +625,7 @@ function Reports() {
                       <td className="font-medium">{cat.categoria}</td>
                       <td>
                         <span className={`badge ${incomeByCategory.includes(cat) ? 'badge-success' : 'badge-danger'}`}>
-                          {incomeByCategory.includes(cat) ? 'Income' : 'Expense'}
+                          {incomeByCategory.includes(cat) ? 'Ingreso' : 'Gasto'}
                         </span>
                       </td>
                       <td className={`text-right font-semibold ${incomeByCategory.includes(cat) ? 'text-emerald-600' : 'text-red-600'}`}>
@@ -579,39 +648,63 @@ function Reports() {
       {activeTab === 'trends' && (
         <div className="space-y-6">
           <div className="card card-body">
-            <h3 className="card-title mb-6">12-Month Income vs Expenses</h3>
-            <div className="h-96">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h3 className="card-title mb-0">Ingresos vs Gastos</h3>
+              <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
+                {trendsGranularityOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setTrendsGranularity(opt.value)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                      trendsGranularity === opt.value
+                        ? 'bg-white text-indigo-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="h-96 relative">
+              {isLoadingTrends && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-xl">
+                  <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                </div>
+              )}
               <Line data={trendsChartData} options={chartOptions} />
             </div>
           </div>
 
           <div className="card">
             <div className="card-header px-6 py-4 border-b border-gray-100">
-              <h3 className="card-title mb-0">Monthly Breakdown</h3>
+              <h3 className="card-title mb-0">
+                Desglose {trendsGranularity === 'daily' ? 'Diario' : trendsGranularity === 'weekly' ? 'Semanal' : trendsGranularity === 'quarterly' ? 'Trimestral' : 'Mensual'}
+              </h3>
             </div>
             <div className="overflow-x-auto">
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Month</th>
-                    <th className="text-right">Income</th>
-                    <th className="text-right">Expenses</th>
+                    <th>Período</th>
+                    <th className="text-right">Ingresos</th>
+                    <th className="text-right">Gastos</th>
                     <th className="text-right">Balance</th>
-                    <th className="text-right">Transactions</th>
+                    <th className="text-right">Transacciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {monthlyTrends.slice().reverse().map(month => (
-                    <tr key={month.mes}>
-                      <td className="font-medium">{month.mes}</td>
-                      <td className="text-right text-emerald-600 font-medium">{formatCurrency(month.ingresos)}</td>
-                      <td className="text-right text-red-600 font-medium">{formatCurrency(month.gastos)}</td>
+                  {monthlyTrends.slice().reverse().map((item, idx) => (
+                    <tr key={item.mes || idx}>
+                      <td className="font-medium">{item.mes}</td>
+                      <td className="text-right text-emerald-600 font-medium">{formatCurrency(item.ingresos)}</td>
+                      <td className="text-right text-red-600 font-medium">{formatCurrency(item.gastos)}</td>
                       <td className={`text-right font-semibold ${
-                        parseFloat(month.ingresos) - parseFloat(month.gastos) >= 0 ? 'text-emerald-600' : 'text-red-600'
+                        parseFloat(item.ingresos) - parseFloat(item.gastos) >= 0 ? 'text-emerald-600' : 'text-red-600'
                       }`}>
-                        {formatCurrency(parseFloat(month.ingresos) - parseFloat(month.gastos))}
+                        {formatCurrency(parseFloat(item.ingresos) - parseFloat(item.gastos))}
                       </td>
-                      <td className="text-right text-gray-500">{month.num_movimientos}</td>
+                      <td className="text-right text-gray-500">{item.num_movimientos}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -625,37 +718,37 @@ function Reports() {
       {activeTab === 'providers' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card card-body">
-            <h3 className="card-title mb-6">Top Providers/Vendors</h3>
+            <h3 className="card-title mb-6">Principales Proveedores/Comercios</h3>
             {spendingByProvider.length > 0 ? (
               <div className="h-96">
                 <Bar data={providerChartData} options={barOptions} />
               </div>
             ) : (
               <div className="h-96 flex items-center justify-center text-gray-500">
-                No provider data for this period
+                Sin datos de proveedores para este período
               </div>
             )}
           </div>
 
           <div className="card card-body">
-            <h3 className="card-title mb-6">Provider Details</h3>
+            <h3 className="card-title mb-6">Detalles de Proveedores</h3>
             <div className="space-y-3">
               {spendingByProvider.map((provider, idx) => (
                 <div key={provider.proveedor || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                   <div>
-                    <p className="font-semibold text-gray-900">{provider.proveedor || 'Unknown'}</p>
-                    <p className="text-sm text-gray-500">{provider.cantidad} transactions</p>
+                    <p className="font-semibold text-gray-900">{provider.proveedor || 'Desconocido'}</p>
+                    <p className="text-sm text-gray-500">{provider.cantidad} transacciones</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-red-600">{formatCurrency(provider.total)}</p>
                     <p className="text-sm text-gray-500">
-                      Avg: {formatCurrency(parseFloat(provider.total) / (provider.cantidad || 1))}
+                      Promedio: {formatCurrency(parseFloat(provider.total) / (provider.cantidad || 1))}
                     </p>
                   </div>
                 </div>
               ))}
               {spendingByProvider.length === 0 && (
-                <div className="text-center py-8 text-gray-500">No provider data for this period</div>
+                <div className="text-center py-8 text-gray-500">Sin datos de proveedores para este período</div>
               )}
             </div>
           </div>

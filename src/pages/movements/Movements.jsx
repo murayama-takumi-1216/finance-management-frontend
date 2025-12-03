@@ -86,7 +86,7 @@ function Movements() {
       setMovements(data.data);
       setPagination(data.pagination);
     } catch (error) {
-      toast.error('Failed to load movements');
+      toast.error('Error al cargar movimientos');
     } finally {
       setIsLoading(false);
     }
@@ -142,7 +142,7 @@ function Movements() {
       setValue('notas', data.notas || '');
       setShowModal(true);
     } catch (error) {
-      toast.error('Failed to load movement');
+      toast.error('Error al cargar el movimiento');
     }
   };
 
@@ -162,37 +162,37 @@ function Movements() {
 
       if (editingMovement) {
         await movementsAPI.update(accountId, editingMovement.id, payload);
-        toast.success('Movement updated successfully');
+        toast.success('Movimiento actualizado exitosamente');
       } else {
         await movementsAPI.create(accountId, payload);
-        toast.success('Movement created successfully');
+        toast.success('Movimiento creado exitosamente');
       }
 
       closeModal();
       loadMovements();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(error.response?.data?.error || 'Operación fallida');
     }
   };
 
   const handleDelete = async (movementId) => {
     try {
       await movementsAPI.delete(accountId, movementId);
-      toast.success('Movement deleted successfully');
+      toast.success('Movimiento eliminado exitosamente');
       setDeleteConfirm(null);
       loadMovements();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to delete movement');
+      toast.error(error.response?.data?.error || 'Error al eliminar movimiento');
     }
   };
 
   const handleConfirm = async (movementId) => {
     try {
       await movementsAPI.confirm(accountId, movementId);
-      toast.success('Movement confirmed');
+      toast.success('Movimiento confirmado');
       loadMovements();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to confirm movement');
+      toast.error(error.response?.data?.error || 'Error al confirmar movimiento');
     }
   };
 
@@ -222,12 +222,12 @@ function Movements() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Movements</h1>
-          <p className="text-gray-500 mt-1">Track your income and expenses</p>
+          <h1 className="text-2xl font-bold text-gray-900">Movimientos</h1>
+          <p className="text-gray-500 mt-1">Rastrea tus ingresos y gastos</p>
         </div>
         <button onClick={openCreateModal} className="btn-primary">
           <PlusIcon className="h-5 w-5 mr-2" />
-          New Movement
+          Nuevo Movimiento
         </button>
       </div>
 
@@ -238,14 +238,14 @@ function Movements() {
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search by description, provider..."
+              placeholder="Buscar por descripción, proveedor..."
               className="input pl-10"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
           <button type="submit" className="btn-primary">
-            Search
+            Buscar
           </button>
           <button
             type="button"
@@ -253,44 +253,44 @@ function Movements() {
             className="btn-secondary"
           >
             <FunnelIcon className="h-5 w-5 mr-2" />
-            Filters
+            Filtros
           </button>
         </form>
 
         {showFilters && (
           <div className="mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-              <label className="label">Type</label>
+              <label className="label">Tipo</label>
               <select
                 className="input"
                 value={filters.tipo}
                 onChange={(e) => setFilters({ ...filters, tipo: e.target.value })}
               >
-                <option value="">All</option>
-                <option value="ingreso">Income</option>
-                <option value="gasto">Expense</option>
+                <option value="">Todos</option>
+                <option value="ingreso">Ingreso</option>
+                <option value="gasto">Gasto</option>
               </select>
             </div>
             <div>
-              <label className="label">Status</label>
+              <label className="label">Estado</label>
               <select
                 className="input"
                 value={filters.estado}
                 onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
               >
-                <option value="">All</option>
-                <option value="confirmado">Confirmed</option>
-                <option value="pendiente_revision">Pending</option>
+                <option value="">Todos</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="pendiente_revision">Pendiente</option>
               </select>
             </div>
             <div>
-              <label className="label">Category</label>
+              <label className="label">Categoría</label>
               <select
                 className="input"
                 value={filters.categoria}
                 onChange={(e) => setFilters({ ...filters, categoria: e.target.value })}
               >
-                <option value="">All</option>
+                <option value="">Todas</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.nombre}
@@ -299,29 +299,29 @@ function Movements() {
               </select>
             </div>
             <div>
-              <label className="label">From Date</label>
+              <label className="label">Desde</label>
               <DatePicker
                 selected={filters.fecha_desde}
                 onChange={(date) => setFilters({ ...filters, fecha_desde: date })}
                 className="input"
-                placeholderText="Select date"
+                placeholderText="Seleccionar fecha"
                 dateFormat="yyyy-MM-dd"
               />
             </div>
             <div>
-              <label className="label">To Date</label>
+              <label className="label">Hasta</label>
               <DatePicker
                 selected={filters.fecha_hasta}
                 onChange={(date) => setFilters({ ...filters, fecha_hasta: date })}
                 className="input"
-                placeholderText="Select date"
+                placeholderText="Seleccionar fecha"
                 dateFormat="yyyy-MM-dd"
               />
             </div>
             <div className="sm:col-span-2 lg:col-span-5 flex justify-end">
               <button onClick={resetFilters} className="btn-secondary text-sm">
                 <ArrowPathIcon className="h-4 w-4 mr-1" />
-                Reset Filters
+                Limpiar Filtros
               </button>
             </div>
           </div>
@@ -342,12 +342,12 @@ function Movements() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                    <th>Status</th>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Categoría</th>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
                     <th className="w-10"></th>
                   </tr>
                 </thead>
@@ -361,7 +361,7 @@ function Movements() {
                             mov.tipo === 'ingreso' ? 'badge-success' : 'badge-danger'
                           }`}
                         >
-                          {mov.tipo === 'ingreso' ? 'Income' : 'Expense'}
+                          {mov.tipo === 'ingreso' ? 'Ingreso' : 'Gasto'}
                         </span>
                       </td>
                       <td>{mov.categoria?.nombre || '-'}</td>
@@ -402,7 +402,7 @@ function Movements() {
                             mov.estado === 'confirmado' ? 'badge-success' : 'badge-warning'
                           }`}
                         >
-                          {mov.estado === 'confirmado' ? 'Confirmed' : 'Pending'}
+                          {mov.estado === 'confirmado' ? 'Confirmado' : 'Pendiente'}
                         </span>
                       </td>
                       <td>
@@ -430,7 +430,7 @@ function Movements() {
                                       } flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-700`}
                                     >
                                       <PencilIcon className="h-4 w-4 mr-2" />
-                                      Edit
+                                      Editar
                                     </button>
                                   )}
                                 </Menu.Item>
@@ -444,7 +444,7 @@ function Movements() {
                                         } flex w-full items-center rounded-md px-3 py-2 text-sm text-success-600`}
                                       >
                                         <CheckCircleIcon className="h-4 w-4 mr-2" />
-                                        Confirm
+                                        Confirmar
                                       </button>
                                     )}
                                   </Menu.Item>
@@ -458,7 +458,7 @@ function Movements() {
                                       } flex w-full items-center rounded-md px-3 py-2 text-sm text-danger-600`}
                                     >
                                       <TrashIcon className="h-4 w-4 mr-2" />
-                                      Delete
+                                      Eliminar
                                     </button>
                                   )}
                                 </Menu.Item>
@@ -477,9 +477,9 @@ function Movements() {
             {pagination && pagination.totalPages > 1 && (
               <div className="p-4 border-t flex items-center justify-between">
                 <p className="text-sm text-gray-500">
-                  Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
-                  {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-                  {pagination.total} results
+                  Mostrando {(pagination.page - 1) * pagination.limit + 1} a{' '}
+                  {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
+                  {pagination.total} resultados
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -487,14 +487,14 @@ function Movements() {
                     disabled={!pagination.hasPreviousPage}
                     className="btn-secondary text-sm"
                   >
-                    Previous
+                    Anterior
                   </button>
                   <button
                     onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
                     disabled={!pagination.hasNextPage}
                     className="btn-secondary text-sm"
                   >
-                    Next
+                    Siguiente
                   </button>
                 </div>
               </div>
@@ -503,11 +503,11 @@ function Movements() {
         ) : (
           <div className="text-center py-12">
             <DocumentChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No movements yet</h3>
-            <p className="text-gray-500 mb-4">Start tracking your income and expenses</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Sin movimientos aún</h3>
+            <p className="text-gray-500 mb-4">Comienza a rastrear tus ingresos y gastos</p>
             <button onClick={openCreateModal} className="btn-primary">
               <PlusIcon className="h-5 w-5 mr-2" />
-              Add Movement
+              Agregar Movimiento
             </button>
           </div>
         )}
@@ -542,7 +542,7 @@ function Movements() {
                 <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
                   <div className="flex items-center justify-between mb-6">
                     <Dialog.Title className="text-lg font-semibold text-gray-900">
-                      {editingMovement ? 'Edit Movement' : 'New Movement'}
+                      {editingMovement ? 'Editar Movimiento' : 'Nuevo Movimiento'}
                     </Dialog.Title>
                     <button
                       onClick={closeModal}
@@ -555,14 +555,14 @@ function Movements() {
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="label">Type</label>
+                        <label className="label">Tipo</label>
                         <select className="input" {...register('tipo', { required: true })}>
-                          <option value="gasto">Expense</option>
-                          <option value="ingreso">Income</option>
+                          <option value="gasto">Gasto</option>
+                          <option value="ingreso">Ingreso</option>
                         </select>
                       </div>
                       <div>
-                        <label className="label">Date</label>
+                        <label className="label">Fecha</label>
                         <DatePicker
                           selected={selectedDate}
                           onChange={setSelectedDate}
@@ -574,7 +574,7 @@ function Movements() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="label">Amount</label>
+                        <label className="label">Monto</label>
                         <input
                           type="number"
                           step="0.01"
@@ -582,8 +582,8 @@ function Movements() {
                           className={`input ${errors.importe ? 'input-error' : ''}`}
                           placeholder="0.00"
                           {...register('importe', {
-                            required: 'Amount is required',
-                            min: { value: 0.01, message: 'Amount must be greater than 0' },
+                            required: 'El monto es requerido',
+                            min: { value: 0.01, message: 'El monto debe ser mayor a 0' },
                           })}
                         />
                         {errors.importe && (
@@ -591,12 +591,12 @@ function Movements() {
                         )}
                       </div>
                       <div>
-                        <label className="label">Category</label>
+                        <label className="label">Categoría</label>
                         <select
                           className={`input ${errors.id_categoria ? 'input-error' : ''}`}
-                          {...register('id_categoria', { required: 'Category is required' })}
+                          {...register('id_categoria', { required: 'La categoría es requerida' })}
                         >
-                          <option value="">Select category</option>
+                          <option value="">Seleccionar categoría</option>
                           {filteredCategories.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                               {cat.nombre}
@@ -612,28 +612,28 @@ function Movements() {
                     </div>
 
                     <div>
-                      <label className="label">Provider/Merchant</label>
+                      <label className="label">Proveedor/Comercio</label>
                       <input
                         type="text"
                         className="input"
-                        placeholder="e.g., Amazon, Uber..."
+                        placeholder="ej., Amazon, Uber..."
                         {...register('proveedor')}
                       />
                     </div>
 
                     <div>
-                      <label className="label">Description</label>
+                      <label className="label">Descripción</label>
                       <input
                         type="text"
                         className="input"
-                        placeholder="Brief description"
+                        placeholder="Breve descripción"
                         {...register('descripcion')}
                       />
                     </div>
 
                     {tags.length > 0 && (
                       <div>
-                        <label className="label">Tags</label>
+                        <label className="label">Etiquetas</label>
                         <div className="flex flex-wrap gap-2">
                           {tags.map((tag) => (
                             <button
@@ -665,21 +665,21 @@ function Movements() {
                     )}
 
                     <div>
-                      <label className="label">Notes</label>
+                      <label className="label">Notas</label>
                       <textarea
                         className="input"
                         rows="2"
-                        placeholder="Additional notes..."
+                        placeholder="Notas adicionales..."
                         {...register('notas')}
                       />
                     </div>
 
                     <div className="flex gap-3 pt-4">
                       <button type="button" onClick={closeModal} className="btn-secondary flex-1">
-                        Cancel
+                        Cancelar
                       </button>
                       <button type="submit" disabled={isSubmitting} className="btn-primary flex-1">
-                        {isSubmitting ? 'Saving...' : editingMovement ? 'Update' : 'Create'}
+                        {isSubmitting ? 'Guardando...' : editingMovement ? 'Actualizar' : 'Crear'}
                       </button>
                     </div>
                   </form>
@@ -718,20 +718,20 @@ function Movements() {
               >
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
                   <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
-                    Delete Movement
+                    Eliminar Movimiento
                   </Dialog.Title>
                   <p className="text-gray-600 mb-6">
-                    Are you sure you want to delete this movement? This action cannot be undone.
+                    ¿Estás seguro de que deseas eliminar este movimiento? Esta acción no se puede deshacer.
                   </p>
                   <div className="flex gap-3">
                     <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1">
-                      Cancel
+                      Cancelar
                     </button>
                     <button
                       onClick={() => handleDelete(deleteConfirm.id)}
                       className="btn-danger flex-1"
                     >
-                      Delete
+                      Eliminar
                     </button>
                   </div>
                 </Dialog.Panel>

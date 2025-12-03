@@ -127,11 +127,11 @@ function NotificationBell() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    if (diffMins < 1) return 'Ahora mismo';
+    if (diffMins < 60) return `hace ${diffMins}m`;
+    if (diffHours < 24) return `hace ${diffHours}h`;
+    if (diffDays < 7) return `hace ${diffDays}d`;
+    return date.toLocaleDateString('es-ES');
   };
 
   return (
@@ -164,13 +164,13 @@ function NotificationBell() {
         <Menu.Items className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h3 className="font-semibold text-gray-900">Notifications</h3>
+            <h3 className="font-semibold text-gray-900">Notificaciones</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium"
               >
-                Mark all as read
+                Marcar todo como leído
               </button>
             )}
           </div>
@@ -220,7 +220,7 @@ function NotificationBell() {
                             <button
                               onClick={(e) => handleMarkAsRead(e, notification.id)}
                               className="p-1.5 rounded-full hover:bg-gray-200 transition-colors"
-                              title="Mark as read"
+                              title="Marcar como leído"
                             >
                               <CheckIcon className="h-4 w-4 text-gray-500" />
                             </button>
@@ -228,7 +228,7 @@ function NotificationBell() {
                           <button
                             onClick={(e) => handleDeleteClick(e, notification)}
                             className="p-1.5 rounded-full hover:bg-red-100 transition-colors"
-                            title="Delete"
+                            title="Eliminar"
                           >
                             <TrashIcon className="h-4 w-4 text-red-500" />
                           </button>
@@ -241,7 +241,7 @@ function NotificationBell() {
             ) : (
               <div className="p-8 text-center">
                 <BellIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No notifications yet</p>
+                <p className="text-gray-500">No hay notificaciones aún</p>
               </div>
             )}
           </div>
@@ -253,7 +253,7 @@ function NotificationBell() {
                 to="/settings"
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium"
               >
-                Notification settings
+                Configuración de notificaciones
               </Link>
             </div>
           )}
@@ -293,10 +293,10 @@ function NotificationBell() {
                     </div>
                     <div>
                       <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
-                        Delete Notification
+                        Eliminar Notificación
                       </Dialog.Title>
                       <p className="mt-1 text-sm text-gray-500">
-                        Are you sure you want to delete this notification?
+                        ¿Estás seguro de que deseas eliminar esta notificación?
                       </p>
                     </div>
                   </div>
@@ -321,7 +321,7 @@ function NotificationBell() {
                       className="btn-secondary"
                       disabled={isDeleting}
                     >
-                      Cancel
+                      Cancelar
                     </button>
                     <button
                       type="button"
@@ -329,7 +329,7 @@ function NotificationBell() {
                       className="btn-danger"
                       disabled={isDeleting}
                     >
-                      {isDeleting ? 'Deleting...' : 'Delete'}
+                      {isDeleting ? 'Eliminando...' : 'Eliminar'}
                     </button>
                   </div>
                 </Dialog.Panel>

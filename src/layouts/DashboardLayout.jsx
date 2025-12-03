@@ -28,21 +28,21 @@ import { useAuthStore, useAccountsStore, useUIStore } from '../store/useStore';
 import NotificationBell from '../components/NotificationBell';
 
 const mainNavItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, color: 'indigo' },
-  { name: 'Accounts', href: '/accounts', icon: WalletIcon, color: 'emerald' },
-  { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentListIcon, color: 'amber' },
-  { name: 'Calendar', href: '/calendar', icon: CalendarIcon, color: 'rose' },
-  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, color: 'slate' },
+  { name: 'Panel', href: '/dashboard', icon: HomeIcon, color: 'indigo' },
+  { name: 'Cuentas', href: '/accounts', icon: WalletIcon, color: 'emerald' },
+  { name: 'Tareas', href: '/tasks', icon: ClipboardDocumentListIcon, color: 'amber' },
+  { name: 'Calendario', href: '/calendar', icon: CalendarIcon, color: 'rose' },
+  { name: 'Configuración', href: '/settings', icon: Cog6ToothIcon, color: 'slate' },
 ];
 
 const accountNavItems = [
-  { name: 'Overview', href: '', icon: HomeIcon, color: 'indigo' },
-  { name: 'Movements', href: '/movements', icon: DocumentChartBarIcon, color: 'emerald' },
-  { name: 'Categories', href: '/categories', icon: FolderIcon, color: 'violet' },
-  { name: 'Tags', href: '/tags', icon: TagIcon, color: 'pink' },
-  { name: 'Reports', href: '/reports', icon: ChartBarIcon, color: 'cyan' },
-  { name: 'Tasks', href: '/tasks', icon: ClipboardDocumentListIcon, color: 'amber' },
-  { name: 'Calendar', href: '/calendar', icon: CalendarIcon, color: 'rose' },
+  { name: 'Resumen', href: '', icon: HomeIcon, color: 'indigo' },
+  { name: 'Movimientos', href: '/movements', icon: DocumentChartBarIcon, color: 'emerald' },
+  { name: 'Categorías', href: '/categories', icon: FolderIcon, color: 'violet' },
+  { name: 'Etiquetas', href: '/tags', icon: TagIcon, color: 'pink' },
+  { name: 'Reportes', href: '/reports', icon: ChartBarIcon, color: 'cyan' },
+  { name: 'Tareas', href: '/tasks', icon: ClipboardDocumentListIcon, color: 'amber' },
+  { name: 'Calendario', href: '/calendar', icon: CalendarIcon, color: 'rose' },
 ];
 
 function DashboardLayout() {
@@ -158,7 +158,7 @@ function DashboardLayout() {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{user?.nombre || 'User'}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{user?.nombre || 'Usuario'}</p>
                         <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                       </div>
                     </div>
@@ -220,7 +220,7 @@ function DashboardLayout() {
               {sidebarOpen ? (
                 <>
                   <ChevronLeftIcon className="h-5 w-5" />
-                  <span>Collapse</span>
+                  <span>Colapsar</span>
                 </>
               ) : (
                 <ChevronRightIcon className="h-5 w-5" />
@@ -281,7 +281,7 @@ function DashboardLayout() {
                     </span>
                   </div>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-semibold text-gray-900">{user?.nombre || 'User'}</p>
+                    <p className="text-sm font-semibold text-gray-900">{user?.nombre || 'Usuario'}</p>
                   </div>
                   <ChevronDownIcon className="hidden md:block h-4 w-4 text-gray-400" />
                 </Menu.Button>
@@ -298,7 +298,7 @@ function DashboardLayout() {
                   <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-xl bg-white p-2 shadow-lg ring-1 ring-black/5 focus:outline-none">
                     {/* User info */}
                     <div className="px-3 py-2 mb-2 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">{user?.nombre || 'User'}</p>
+                      <p className="text-sm font-semibold text-gray-900">{user?.nombre || 'Usuario'}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                     </div>
 
@@ -311,7 +311,7 @@ function DashboardLayout() {
                           } text-gray-700`}
                         >
                           <Cog6ToothIcon className="h-4 w-4 text-gray-500" />
-                          Settings
+                          Configuración
                         </NavLink>
                       )}
                     </Menu.Item>
@@ -324,7 +324,7 @@ function DashboardLayout() {
                           } text-red-600`}
                         >
                           <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                          Sign out
+                          Cerrar sesión
                         </button>
                       )}
                     </Menu.Item>
@@ -355,7 +355,7 @@ function SidebarContent({ isAccountPage, accountId, currentAccount, accounts, co
       <div>
         {!collapsed && (
           <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            {isAccountPage ? 'Account Menu' : 'Main Menu'}
+            {isAccountPage ? 'Menú de Cuenta' : 'Menú Principal'}
           </p>
         )}
         <ul role="list" className="space-y-1">
@@ -408,7 +408,7 @@ function SidebarContent({ isAccountPage, accountId, currentAccount, accounts, co
             }`}
           >
             <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            {!collapsed && <span>Back to Accounts</span>}
+            {!collapsed && <span>Volver a Cuentas</span>}
           </NavLink>
         </div>
       )}
@@ -417,7 +417,7 @@ function SidebarContent({ isAccountPage, accountId, currentAccount, accounts, co
       {!isAccountPage && accounts.length > 0 && !collapsed && (
         <div className="mt-auto">
           <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            Quick Access
+            Acceso Rápido
           </p>
           <ul role="list" className="space-y-1">
             {accounts.slice(0, 4).map((account, index) => (
@@ -448,7 +448,7 @@ function SidebarContent({ isAccountPage, accountId, currentAccount, accounts, co
                   onClick={onClose}
                   className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
                 >
-                  <span>View all ({accounts.length})</span>
+                  <span>Ver todo ({accounts.length})</span>
                 </NavLink>
               </li>
             )}

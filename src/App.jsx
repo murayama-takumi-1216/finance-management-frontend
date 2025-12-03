@@ -30,7 +30,7 @@ function LoadingScreen() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
+        <p className="mt-4 text-gray-600">Cargando...</p>
       </div>
     </div>
   );
@@ -160,9 +160,9 @@ function App() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
               <div className="text-center">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
-                <p className="text-gray-600 mb-4">Page not found</p>
+                <p className="text-gray-600 mb-4">Página no encontrada</p>
                 <a href="/dashboard" className="btn-primary">
-                  Go to Dashboard
+                  Ir al Panel
                 </a>
               </div>
             </div>

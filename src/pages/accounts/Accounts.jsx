@@ -21,19 +21,19 @@ import { Menu } from '@headlessui/react';
 
 const accountTypes = [
   { value: 'personal', label: 'Personal', icon: WalletIcon, color: 'from-blue-500 to-blue-600' },
-  { value: 'negocio', label: 'Business', icon: BuildingStorefrontIcon, color: 'from-purple-500 to-purple-600' },
-  { value: 'ahorro', label: 'Savings', icon: BanknotesIcon, color: 'from-emerald-500 to-emerald-600' },
-  { value: 'compartida', label: 'Shared', icon: UsersIcon, color: 'from-amber-500 to-amber-600' },
+  { value: 'negocio', label: 'Negocio', icon: BuildingStorefrontIcon, color: 'from-purple-500 to-purple-600' },
+  { value: 'ahorro', label: 'Ahorro', icon: BanknotesIcon, color: 'from-emerald-500 to-emerald-600' },
+  { value: 'compartida', label: 'Compartida', icon: UsersIcon, color: 'from-amber-500 to-amber-600' },
 ];
 
 const currencies = [
-  { value: 'USD', label: 'USD - US Dollar' },
+  { value: 'USD', label: 'USD - Dólar Estadounidense' },
   { value: 'EUR', label: 'EUR - Euro' },
-  { value: 'GBP', label: 'GBP - British Pound' },
-  { value: 'MXN', label: 'MXN - Mexican Peso' },
-  { value: 'ARS', label: 'ARS - Argentine Peso' },
-  { value: 'BRL', label: 'BRL - Brazilian Real' },
-  { value: 'COP', label: 'COP - Colombian Peso' },
+  { value: 'GBP', label: 'GBP - Libra Esterlina' },
+  { value: 'MXN', label: 'MXN - Peso Mexicano' },
+  { value: 'ARS', label: 'ARS - Peso Argentino' },
+  { value: 'BRL', label: 'BRL - Real Brasileño' },
+  { value: 'COP', label: 'COP - Peso Colombiano' },
 ];
 
 function Accounts() {
@@ -90,9 +90,9 @@ function Accounts() {
 
         if (currencyChanging) {
           const confirmed = window.confirm(
-            `You are changing the currency from ${editingAccount.moneda} to ${data.moneda}.\n\n` +
-            `All transaction amounts will be automatically converted to the new currency.\n\n` +
-            `Do you want to continue?`
+            `Estás cambiando la moneda de ${editingAccount.moneda} a ${data.moneda}.\n\n` +
+            `Todos los montos de las transacciones se convertirán automáticamente a la nueva moneda.\n\n` +
+            `¿Deseas continuar?`
           );
 
           if (!confirmed) {
@@ -103,27 +103,27 @@ function Accounts() {
         const response = await updateAccount(editingAccount.id, data);
 
         if (response?.currencyConverted) {
-          toast.success(`Account updated and amounts converted to ${data.moneda}`);
+          toast.success(`Cuenta actualizada y montos convertidos a ${data.moneda}`);
         } else {
-          toast.success('Account updated successfully');
+          toast.success('Cuenta actualizada exitosamente');
         }
       } else {
         await createAccount(data);
-        toast.success('Account created successfully');
+        toast.success('Cuenta creada exitosamente');
       }
       closeModal();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(error.response?.data?.error || 'Operación fallida');
     }
   };
 
   const handleDelete = async (accountId) => {
     try {
       await deleteAccount(accountId);
-      toast.success('Account archived successfully');
+      toast.success('Cuenta archivada exitosamente');
       setDeleteConfirm(null);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to archive account');
+      toast.error(error.response?.data?.error || 'Error al archivar cuenta');
     }
   };
 
@@ -143,12 +143,12 @@ function Accounts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="page-header mb-0">
-          <h1 className="page-title">Accounts</h1>
-          <p className="page-subtitle">Manage your financial accounts</p>
+          <h1 className="page-title">Cuentas</h1>
+          <p className="page-subtitle">Administra tus cuentas financieras</p>
         </div>
         <button onClick={openCreateModal} className="btn-primary">
           <PlusIcon className="h-5 w-5" />
-          New Account
+          Nueva Cuenta
         </button>
       </div>
 
@@ -177,13 +177,13 @@ function Accounts() {
             return (
               <div
                 key={account.id}
-                className="card card-hover group relative overflow-hidden"
+                className="card card-hover group relative"
               >
                 {/* Gradient decoration */}
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${accountType.color} opacity-5 rounded-full -translate-y-1/2 translate-x-1/2`} />
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${accountType.color} opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none`} />
 
                 {/* Actions Menu */}
-                <Menu as="div" className="absolute top-4 right-4 z-10">
+                <Menu as="div" className="absolute top-4 right-4 z-20">
                   <Menu.Button className="btn-icon-sm bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm">
                     <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                   </Menu.Button>
@@ -196,15 +196,15 @@ function Accounts() {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="dropdown-menu">
+                    <Menu.Items className="absolute right-0 mt-2 w-44 origin-top-right rounded-xl bg-white shadow-xl ring-1 ring-black/5 focus:outline-none py-2 z-50">
                       <Menu.Item>
                         {({ active }) => (
                           <button
                             onClick={() => openEditModal(account)}
-                            className={`dropdown-item ${active ? 'bg-gray-100' : ''}`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 ${active ? 'bg-gray-50' : ''}`}
                           >
-                            <PencilIcon className="h-4 w-4" />
-                            Edit
+                            <PencilIcon className="h-4 w-4 text-gray-400" />
+                            Editar
                           </button>
                         )}
                       </Menu.Item>
@@ -212,10 +212,10 @@ function Accounts() {
                         {({ active }) => (
                           <button
                             onClick={() => setDeleteConfirm(account)}
-                            className={`dropdown-item-danger ${active ? 'bg-red-50' : ''}`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 ${active ? 'bg-red-50' : ''}`}
                           >
                             <TrashIcon className="h-4 w-4" />
-                            Archive
+                            Archivar
                           </button>
                         )}
                       </Menu.Item>
@@ -236,7 +236,7 @@ function Accounts() {
 
                   <div className="flex items-end justify-between">
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Balance</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Saldo</p>
                       <p className="text-2xl font-bold text-gray-900">
                         {account.balance
                           ? formatCurrency(account.balance.saldo, account.moneda)
@@ -248,7 +248,7 @@ function Accounts() {
 
                   {account.estado === 'archivada' && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
-                      <span className="badge-gray">Archived</span>
+                      <span className="badge-gray">Archivada</span>
                     </div>
                   )}
                 </Link>
@@ -262,13 +262,13 @@ function Accounts() {
             <div className="empty-state-icon">
               <CreditCardIcon className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="empty-state-title">No accounts yet</h3>
+            <h3 className="empty-state-title">Sin cuentas aún</h3>
             <p className="empty-state-description">
-              Create your first account to start tracking your finances and manage your money effectively.
+              Crea tu primera cuenta para comenzar a rastrear tus finanzas y administrar tu dinero efectivamente.
             </p>
             <button onClick={openCreateModal} className="btn-primary">
               <PlusIcon className="h-5 w-5" />
-              Create Account
+              Crear Cuenta
             </button>
           </div>
         </div>
@@ -303,7 +303,7 @@ function Accounts() {
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
                     <Dialog.Title className="modal-title">
-                      {editingAccount ? 'Edit Account' : 'Create Account'}
+                      {editingAccount ? 'Editar Cuenta' : 'Crear Cuenta'}
                     </Dialog.Title>
                     <button
                       onClick={closeModal}
@@ -317,14 +317,14 @@ function Accounts() {
                     <div className="modal-body space-y-5">
                       <div className="form-group">
                         <label htmlFor="nombre" className="label">
-                          Account Name
+                          Nombre de la Cuenta
                         </label>
                         <input
                           id="nombre"
                           type="text"
                           className={`input ${errors.nombre ? 'input-error' : ''}`}
-                          placeholder="e.g., Personal Checking"
-                          {...register('nombre', { required: 'Account name is required' })}
+                          placeholder="ej., Cuenta Personal"
+                          {...register('nombre', { required: 'El nombre de la cuenta es requerido' })}
                         />
                         {errors.nombre && (
                           <p className="error-text">{errors.nombre.message}</p>
@@ -333,12 +333,12 @@ function Accounts() {
 
                       <div className="form-group">
                         <label htmlFor="tipo" className="label">
-                          Account Type
+                          Tipo de Cuenta
                         </label>
                         <select
                           id="tipo"
                           className="select"
-                          {...register('tipo', { required: 'Account type is required' })}
+                          {...register('tipo', { required: 'El tipo de cuenta es requerido' })}
                         >
                           {accountTypes.map((type) => (
                             <option key={type.value} value={type.value}>
@@ -350,7 +350,7 @@ function Accounts() {
 
                       <div className="form-group">
                         <label htmlFor="moneda" className="label">
-                          Currency
+                          Moneda
                         </label>
                         <select
                           id="moneda"
@@ -372,7 +372,7 @@ function Accounts() {
                         onClick={closeModal}
                         className="btn-secondary"
                       >
-                        Cancel
+                        Cancelar
                       </button>
                       <button
                         type="submit"
@@ -382,12 +382,12 @@ function Accounts() {
                         {isSubmitting ? (
                           <>
                             <span className="spinner" />
-                            Saving...
+                            Guardando...
                           </>
                         ) : editingAccount ? (
-                          'Update'
+                          'Actualizar'
                         ) : (
-                          'Create'
+                          'Crear'
                         )}
                       </button>
                     </div>
@@ -435,10 +435,10 @@ function Accounts() {
                       <TrashIcon className="h-8 w-8 text-red-600" />
                     </div>
                     <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">
-                      Archive Account
+                      Archivar Cuenta
                     </Dialog.Title>
                     <p className="text-gray-600">
-                      Are you sure you want to archive <strong>"{deleteConfirm?.nombre}"</strong>? You can still view it but won't be able to add new transactions.
+                      ¿Estás seguro de que deseas archivar <strong>"{deleteConfirm?.nombre}"</strong>? Podrás seguir viéndola pero no podrás agregar nuevas transacciones.
                     </p>
                   </div>
                   <div className="modal-footer justify-center">
@@ -446,13 +446,13 @@ function Accounts() {
                       onClick={() => setDeleteConfirm(null)}
                       className="btn-secondary"
                     >
-                      Cancel
+                      Cancelar
                     </button>
                     <button
                       onClick={() => handleDelete(deleteConfirm.id)}
                       className="btn-danger"
                     >
-                      Archive
+                      Archivar
                     </button>
                   </div>
                 </Dialog.Panel>

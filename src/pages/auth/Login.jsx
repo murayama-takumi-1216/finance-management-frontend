@@ -20,24 +20,24 @@ function Login() {
     clearError();
     try {
       await login(data.email, data.password);
-      toast.success('Welcome back!');
+      toast.success('¡Bienvenido de nuevo!');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed');
+      toast.error(err.response?.data?.error || 'Error al iniciar sesión');
     }
   };
 
   return (
     <div className="card p-8 shadow-xl border-0 animate-slideUp">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
-        <p className="text-gray-500 mt-2">Sign in to continue to your account</p>
+        <h2 className="text-2xl font-bold text-gray-900">Bienvenido de nuevo</h2>
+        <p className="text-gray-500 mt-2">Inicia sesión para continuar a tu cuenta</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="form-group">
           <label htmlFor="email" className="label">
-            Email address
+            Correo electrónico
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -50,10 +50,10 @@ function Login() {
               className={`input pl-11 ${errors.email ? 'input-error' : ''}`}
               placeholder="you@example.com"
               {...register('email', {
-                required: 'Email is required',
+                required: 'El correo electrónico es requerido',
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Invalid email address',
+                  message: 'Correo electrónico inválido',
                 },
               })}
             />
@@ -70,7 +70,7 @@ function Login() {
 
         <div className="form-group">
           <label htmlFor="password" className="label">
-            Password
+            Contraseña
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -81,12 +81,12 @@ function Login() {
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               className={`input pl-11 pr-11 ${errors.password ? 'input-error' : ''}`}
-              placeholder="Enter your password"
+              placeholder="Ingresa tu contraseña"
               {...register('password', {
-                required: 'Password is required',
+                required: 'La contraseña es requerida',
                 minLength: {
                   value: 6,
-                  message: 'Password must be at least 6 characters',
+                  message: 'La contraseña debe tener al menos 6 caracteres',
                 },
               })}
             />
@@ -125,22 +125,22 @@ function Login() {
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="spinner" />
-              Signing in...
+              Iniciando sesión...
             </span>
           ) : (
-            'Sign in'
+            'Iniciar sesión'
           )}
         </button>
       </form>
 
       <div className="divider-text mt-6">
-        <span>New here?</span>
+        <span>¿Eres nuevo?</span>
       </div>
 
       <p className="text-center text-sm text-gray-600 mt-4">
-        Don't have an account?{' '}
+        ¿No tienes una cuenta?{' '}
         <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
-          Create an account
+          Crear una cuenta
         </Link>
       </p>
     </div>

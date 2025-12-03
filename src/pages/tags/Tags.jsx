@@ -7,16 +7,16 @@ import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, TagIcon, HashtagIcon } from
 import { useTagsStore } from '../../store/useStore';
 
 const colorOptions = [
-  { value: '#3B82F6', label: 'Blue' },
-  { value: '#EF4444', label: 'Red' },
-  { value: '#22C55E', label: 'Green' },
-  { value: '#F59E0B', label: 'Amber' },
-  { value: '#8B5CF6', label: 'Purple' },
-  { value: '#EC4899', label: 'Pink' },
-  { value: '#06B6D4', label: 'Cyan' },
-  { value: '#F97316', label: 'Orange' },
-  { value: '#6366F1', label: 'Indigo' },
-  { value: '#84CC16', label: 'Lime' },
+  { value: '#3B82F6', label: 'Azul' },
+  { value: '#EF4444', label: 'Rojo' },
+  { value: '#22C55E', label: 'Verde' },
+  { value: '#F59E0B', label: 'Ámbar' },
+  { value: '#8B5CF6', label: 'Púrpura' },
+  { value: '#EC4899', label: 'Rosa' },
+  { value: '#06B6D4', label: 'Cian' },
+  { value: '#F97316', label: 'Naranja' },
+  { value: '#6366F1', label: 'Índigo' },
+  { value: '#84CC16', label: 'Lima' },
 ];
 
 function Tags() {
@@ -58,24 +58,24 @@ function Tags() {
       const payload = { ...data, color: selectedColor };
       if (editingTag) {
         await updateTag(accountId, editingTag.id, payload);
-        toast.success('Tag updated');
+        toast.success('Etiqueta actualizada');
       } else {
         await createTag(accountId, payload);
-        toast.success('Tag created');
+        toast.success('Etiqueta creada');
       }
       closeModal();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(error.response?.data?.error || 'Operación fallida');
     }
   };
 
   const handleDelete = async (tagId) => {
     try {
       await deleteTag(accountId, tagId);
-      toast.success('Tag deleted');
+      toast.success('Etiqueta eliminada');
       setDeleteConfirm(null);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to delete');
+      toast.error(error.response?.data?.error || 'Error al eliminar');
     }
   };
 
@@ -91,14 +91,14 @@ function Tags() {
               <HashtagIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="page-title">Tags</h1>
-              <p className="page-subtitle">Label your transactions</p>
+              <h1 className="page-title">Etiquetas</h1>
+              <p className="page-subtitle">Etiqueta tus transacciones</p>
             </div>
           </div>
         </div>
         <button onClick={openCreateModal} className="btn-primary">
           <PlusIcon className="h-5 w-5" />
-          New Tag
+          Nueva Etiqueta
         </button>
       </div>
 
@@ -110,7 +110,7 @@ function Tags() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-900">{tags.length}</p>
-            <p className="text-sm text-gray-500">Total Tags</p>
+            <p className="text-sm text-gray-500">Total de Etiquetas</p>
           </div>
         </div>
         <div className="card card-body flex items-center gap-4">
@@ -119,7 +119,7 @@ function Tags() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-900">{totalUses}</p>
-            <p className="text-sm text-gray-500">Total Uses</p>
+            <p className="text-sm text-gray-500">Total de Usos</p>
           </div>
         </div>
       </div>
@@ -132,8 +132,8 @@ function Tags() {
               <TagIcon className="h-5 w-5 text-pink-600" />
             </div>
             <div>
-              <h2 className="card-title mb-0">Your Tags</h2>
-              <p className="card-subtitle">{tags.length} tags created</p>
+              <h2 className="card-title mb-0">Tus Etiquetas</h2>
+              <p className="card-subtitle">{tags.length} etiquetas creadas</p>
             </div>
           </div>
         </div>
@@ -162,7 +162,7 @@ function Tags() {
                       />
                     </div>
                     <p className="text-sm text-gray-500">
-                      {tag.usoCount || 0} {tag.usoCount === 1 ? 'use' : 'uses'}
+                      {tag.usoCount || 0} {tag.usoCount === 1 ? 'uso' : 'usos'}
                     </p>
                   </div>
                 </div>
@@ -170,14 +170,14 @@ function Tags() {
                   <button
                     onClick={() => openEditModal(tag)}
                     className="btn-icon-sm hover:bg-gray-100"
-                    title="Edit"
+                    title="Editar"
                   >
                     <PencilIcon className="h-4 w-4 text-gray-500" />
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(tag)}
                     className="btn-icon-sm hover:bg-red-50"
-                    title="Delete"
+                    title="Eliminar"
                   >
                     <TrashIcon className="h-4 w-4 text-red-500" />
                   </button>
@@ -190,11 +190,11 @@ function Tags() {
             <div className="empty-state-icon">
               <TagIcon className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="empty-state-title">No tags yet</h3>
-            <p className="empty-state-description">Create tags to label and organize your transactions</p>
+            <h3 className="empty-state-title">Sin etiquetas aún</h3>
+            <p className="empty-state-description">Crea etiquetas para etiquetar y organizar tus transacciones</p>
             <button onClick={openCreateModal} className="btn-primary">
               <PlusIcon className="h-5 w-5" />
-              Create Tag
+              Crear Etiqueta
             </button>
           </div>
         )}
@@ -212,7 +212,7 @@ function Tags() {
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
                     <Dialog.Title className="modal-title">
-                      {editingTag ? 'Edit Tag' : 'New Tag'}
+                      {editingTag ? 'Editar Etiqueta' : 'Nueva Etiqueta'}
                     </Dialog.Title>
                     <button onClick={closeModal} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
@@ -228,17 +228,17 @@ function Tags() {
                           style={{ backgroundColor: selectedColor }}
                         >
                           <TagIcon className="h-4 w-4" />
-                          <span>{editingTag?.nombre || 'Tag Preview'}</span>
+                          <span>{editingTag?.nombre || 'Vista Previa'}</span>
                         </div>
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Tag Name</label>
+                        <label className="label">Nombre de la Etiqueta</label>
                         <input
                           type="text"
                           className={`input ${errors.nombre ? 'input-error' : ''}`}
-                          placeholder="e.g., Vacation, Work"
-                          {...register('nombre', { required: 'Name is required' })}
+                          placeholder="ej., Vacaciones, Trabajo"
+                          {...register('nombre', { required: 'El nombre es requerido' })}
                         />
                         {errors.nombre && <p className="error-text">{errors.nombre.message}</p>}
                       </div>
@@ -272,16 +272,16 @@ function Tags() {
 
                     <div className="modal-footer">
                       <button type="button" onClick={closeModal} className="btn-secondary">
-                        Cancel
+                        Cancelar
                       </button>
                       <button type="submit" disabled={isSubmitting} className="btn-primary">
                         {isSubmitting ? (
                           <>
                             <span className="spinner" />
-                            Saving...
+                            Guardando...
                           </>
                         ) : (
-                          'Save'
+                          'Guardar'
                         )}
                       </button>
                     </div>
@@ -308,15 +308,15 @@ function Tags() {
                       <TrashIcon className="h-8 w-8 text-red-600" />
                     </div>
                     <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">
-                      Delete Tag
+                      Eliminar Etiqueta
                     </Dialog.Title>
                     <p className="text-gray-600">
-                      Delete <strong>"{deleteConfirm?.nombre}"</strong>? This will remove it from all transactions.
+                      ¿Eliminar <strong>"{deleteConfirm?.nombre}"</strong>? Se eliminará de todas las transacciones.
                     </p>
                   </div>
                   <div className="modal-footer justify-center">
-                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancel</button>
-                    <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-danger">Delete</button>
+                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancelar</button>
+                    <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-danger">Eliminar</button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

@@ -99,10 +99,10 @@ function Settings() {
     setSavingPreferences(true);
     try {
       await updatePreferences(localPreferences);
-      toast.success('Settings saved successfully');
+      toast.success('Configuración guardada exitosamente');
       setPreferencesChanged(false);
     } catch (error) {
-      toast.error('Failed to save settings');
+      toast.error('Error al guardar la configuración');
     } finally {
       setSavingPreferences(false);
     }
@@ -121,12 +121,12 @@ function Settings() {
 
     const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/webm'];
     if (!validTypes.includes(file.type)) {
-      toast.error('Please upload a valid audio file (MP3, WAV, or OGG)');
+      toast.error('Por favor sube un archivo de audio válido (MP3, WAV o OGG)');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
+      toast.error('El tamaño del archivo debe ser menor a 5MB');
       return;
     }
 
@@ -137,11 +137,11 @@ function Settings() {
       formData.append('name', file.name.replace(/\.[^/.]+$/, ''));
 
       const { data } = await preferencesAPI.uploadSound(formData);
-      toast.success('Sound uploaded successfully');
+      toast.success('Sonido subido exitosamente');
       await fetchCustomSounds();
       handleLocalPreferenceChange('notificationSound', data.sound.id);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to upload sound');
+      toast.error(error.response?.data?.error || 'Error al subir el sonido');
     } finally {
       setUploadingSound(false);
       event.target.value = '';
@@ -160,7 +160,7 @@ function Settings() {
     setIsDeletingSound(true);
     try {
       await preferencesAPI.deleteSound(numericId);
-      toast.success('Sound deleted');
+      toast.success('Sonido eliminado');
 
       if (localPreferences.notificationSound === soundToDelete.id) {
         handleLocalPreferenceChange('notificationSound', 'default');
@@ -170,7 +170,7 @@ function Settings() {
       setShowDeleteSoundModal(false);
       setSoundToDelete(null);
     } catch (error) {
-      toast.error('Failed to delete sound');
+      toast.error('Error al eliminar el sonido');
     } finally {
       setIsDeletingSound(false);
     }
@@ -193,10 +193,10 @@ function Settings() {
   const onProfileSubmit = async (data) => {
     try {
       await usersAPI.updateProfile(data);
-      toast.success('Profile updated');
+      toast.success('Perfil actualizado');
       checkAuth();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Update failed');
+      toast.error(error.response?.data?.error || 'Error en la actualización');
     }
   };
 
@@ -206,18 +206,18 @@ function Settings() {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
-      toast.success('Password changed successfully');
+      toast.success('Contraseña cambiada exitosamente');
       setShowPasswordModal(false);
       resetPassword();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Password change failed');
+      toast.error(error.response?.data?.error || 'Error al cambiar la contraseña');
     }
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: UserCircleIcon, description: 'Manage your personal information' },
-    { id: 'security', label: 'Security', icon: ShieldCheckIcon, description: 'Password and account security' },
-    { id: 'notifications', label: 'Notifications', icon: BellIcon, description: 'Configure alerts and sounds' },
+    { id: 'profile', label: 'Perfil', icon: UserCircleIcon, description: 'Administra tu información personal' },
+    { id: 'security', label: 'Seguridad', icon: ShieldCheckIcon, description: 'Contraseña y seguridad de la cuenta' },
+    { id: 'notifications', label: 'Notificaciones', icon: BellIcon, description: 'Configura alertas y sonidos' },
   ];
 
   return (
@@ -229,8 +229,8 @@ function Settings() {
             <Cog6ToothIcon className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="page-title">Settings</h1>
-            <p className="page-subtitle">Manage your account preferences</p>
+            <h1 className="page-title">Configuración</h1>
+            <p className="page-subtitle">Administra las preferencias de tu cuenta</p>
           </div>
         </div>
       </div>
@@ -270,18 +270,18 @@ function Settings() {
             <div className="card">
               <div className="card-header mb-6">
                 <div>
-                  <h2 className="card-title">Profile Information</h2>
-                  <p className="card-subtitle">Update your personal details</p>
+                  <h2 className="card-title">Información del Perfil</h2>
+                  <p className="card-subtitle">Actualiza tus datos personales</p>
                 </div>
               </div>
               <div className="card-body pt-0">
                 <form onSubmit={handleSubmit(onProfileSubmit)} className="space-y-5 max-w-md">
                   <div className="form-group">
-                    <label className="label">Full Name</label>
+                    <label className="label">Nombre Completo</label>
                     <input
                       type="text"
                       className={`input ${errors.nombre ? 'input-error' : ''}`}
-                      {...register('nombre', { required: 'Name is required' })}
+                      {...register('nombre', { required: 'El nombre es requerido' })}
                     />
                     {errors.nombre && (
                       <p className="error-text">{errors.nombre.message}</p>
@@ -289,15 +289,15 @@ function Settings() {
                   </div>
 
                   <div className="form-group">
-                    <label className="label">Email Address</label>
+                    <label className="label">Correo Electrónico</label>
                     <input
                       type="email"
                       className={`input ${errors.email ? 'input-error' : ''}`}
                       {...register('email', {
-                        required: 'Email is required',
+                        required: 'El correo es requerido',
                         pattern: {
                           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: 'Invalid email address',
+                          message: 'Correo electrónico inválido',
                         },
                       })}
                     />
@@ -311,10 +311,10 @@ function Settings() {
                       {isSubmitting ? (
                         <>
                           <span className="spinner" />
-                          Saving...
+                          Guardando...
                         </>
                       ) : (
-                        'Save Changes'
+                        'Guardar Cambios'
                       )}
                     </button>
                   </div>
@@ -332,13 +332,13 @@ function Settings() {
                     <KeyIcon className="h-6 w-6 text-indigo-600" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="card-title mb-1">Password</h2>
+                    <h2 className="card-title mb-1">Contraseña</h2>
                     <p className="text-gray-500 text-sm mb-4">
-                      Change your password to keep your account secure.
+                      Cambia tu contraseña para mantener tu cuenta segura.
                     </p>
                     <button onClick={() => setShowPasswordModal(true)} className="btn-secondary">
                       <KeyIcon className="h-5 w-5" />
-                      Change Password
+                      Cambiar Contraseña
                     </button>
                   </div>
                 </div>
@@ -350,13 +350,13 @@ function Settings() {
                     <ShieldCheckIcon className="h-6 w-6 text-emerald-600" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="card-title mb-1">Account Status</h2>
+                    <h2 className="card-title mb-1">Estado de la Cuenta</h2>
                     <div className="flex items-center gap-3 mt-3">
                       <span className={`badge ${user?.activo ? 'badge-success' : 'badge-danger'}`}>
-                        {user?.activo ? 'Active' : 'Inactive'}
+                        {user?.activo ? 'Activo' : 'Inactivo'}
                       </span>
                       <span className="text-sm text-gray-500">
-                        Member since {new Date(user?.createdAt).toLocaleDateString()}
+                        Miembro desde {new Date(user?.createdAt).toLocaleDateString('es-ES')}
                       </span>
                     </div>
                   </div>
@@ -369,15 +369,15 @@ function Settings() {
                     <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="card-title text-red-700 mb-1">Danger Zone</h2>
+                    <h2 className="card-title text-red-700 mb-1">Zona de Peligro</h2>
                     <p className="text-gray-600 text-sm mb-4">
-                      Once you delete your account, there is no going back. Please be certain.
+                      Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, asegúrate.
                     </p>
                     <button
-                      onClick={() => toast.error('Account deletion requires admin approval')}
+                      onClick={() => toast.error('La eliminación de cuenta requiere aprobación del administrador')}
                       className="btn-danger"
                     >
-                      Delete Account
+                      Eliminar Cuenta
                     </button>
                   </div>
                 </div>
@@ -395,15 +395,15 @@ function Settings() {
                     <SpeakerWaveIcon className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div>
-                    <h2 className="card-title mb-0">Sound Settings</h2>
-                    <p className="card-subtitle">Choose your notification sound</p>
+                    <h2 className="card-title mb-0">Configuración de Sonido</h2>
+                    <p className="card-subtitle">Elige tu sonido de notificación</p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   {/* Built-in Sounds */}
                   <div>
-                    <label className="label">Built-in Sounds</label>
+                    <label className="label">Sonidos Integrados</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {NOTIFICATION_SOUNDS.map((sound) => (
                         <div
@@ -430,7 +430,7 @@ function Settings() {
                                 previewSound(sound.id);
                               }}
                               className="btn-icon-sm hover:bg-white/50"
-                              title="Preview sound"
+                              title="Vista previa del sonido"
                             >
                               <PlayIcon className="h-4 w-4 text-gray-600" />
                             </button>
@@ -443,10 +443,10 @@ function Settings() {
                   {/* Custom Sounds */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <label className="label mb-0">My Custom Sounds</label>
+                      <label className="label mb-0">Mis Sonidos Personalizados</label>
                       <label className="btn-secondary btn-sm cursor-pointer">
                         <ArrowUpTrayIcon className="h-4 w-4" />
-                        {uploadingSound ? 'Uploading...' : 'Upload Sound'}
+                        {uploadingSound ? 'Subiendo...' : 'Subir Sonido'}
                         <input
                           type="file"
                           accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/webm"
@@ -486,7 +486,7 @@ function Settings() {
                                   previewSound(sound.id);
                                 }}
                                 className="btn-icon-sm hover:bg-white/50"
-                                title="Preview sound"
+                                title="Vista previa del sonido"
                               >
                                 <PlayIcon className="h-4 w-4 text-gray-600" />
                               </button>
@@ -497,7 +497,7 @@ function Settings() {
                                   handleDeleteSoundClick(sound);
                                 }}
                                 className="btn-icon-sm hover:bg-red-100"
-                                title="Delete sound"
+                                title="Eliminar sonido"
                               >
                                 <TrashIcon className="h-4 w-4 text-red-500" />
                               </button>
@@ -509,7 +509,7 @@ function Settings() {
                       <div className="text-center py-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                         <MusicalNoteIcon className="h-10 w-10 text-gray-300 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">
-                          No custom sounds uploaded yet.<br />Upload your own MP3, WAV, or OGG files.
+                          No hay sonidos personalizados subidos aún.<br />Sube tus propios archivos MP3, WAV o OGG.
                         </p>
                       </div>
                     )}
@@ -517,7 +517,7 @@ function Settings() {
 
                   {/* Volume Control */}
                   <div>
-                    <label className="label">Volume</label>
+                    <label className="label">Volumen</label>
                     <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                       <SpeakerWaveIcon className="h-5 w-5 text-gray-400" />
                       <input
@@ -541,7 +541,7 @@ function Settings() {
                       className="mt-3 btn-secondary btn-sm"
                     >
                       <PlayIcon className="h-4 w-4" />
-                      Test Sound
+                      Probar Sonido
                     </button>
                   </div>
                 </div>
@@ -554,16 +554,16 @@ function Settings() {
                     <BellIcon className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="card-title mb-0">Quiet Hours</h2>
-                    <p className="card-subtitle">Mute notifications during specified hours</p>
+                    <h2 className="card-title mb-0">Horas de Silencio</h2>
+                    <p className="card-subtitle">Silenciar notificaciones durante horas específicas</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                     <div>
-                      <p className="font-medium text-gray-900">Enable Quiet Hours</p>
-                      <p className="text-sm text-gray-500">Pause all notification sounds</p>
+                      <p className="font-medium text-gray-900">Activar Horas de Silencio</p>
+                      <p className="text-sm text-gray-500">Pausar todos los sonidos de notificación</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -579,7 +579,7 @@ function Settings() {
                   {localPreferences.quietHoursEnabled && (
                     <div className="form-row">
                       <div className="form-group">
-                        <label className="label">Start Time</label>
+                        <label className="label">Hora de Inicio</label>
                         <input
                           type="time"
                           value={localPreferences.quietHoursStart}
@@ -588,7 +588,7 @@ function Settings() {
                         />
                       </div>
                       <div className="form-group">
-                        <label className="label">End Time</label>
+                        <label className="label">Hora de Fin</label>
                         <input
                           type="time"
                           value={localPreferences.quietHoursEnd}
@@ -606,7 +606,7 @@ function Settings() {
                 {preferencesChanged && (
                   <span className="text-sm text-amber-600 flex items-center gap-2">
                     <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-                    Unsaved changes
+                    Cambios sin guardar
                   </span>
                 )}
                 <button
@@ -618,10 +618,10 @@ function Settings() {
                   {savingPreferences ? (
                     <>
                       <span className="spinner" />
-                      Saving...
+                      Guardando...
                     </>
                   ) : (
-                    'Save Changes'
+                    'Guardar Cambios'
                   )}
                 </button>
               </div>
@@ -658,7 +658,7 @@ function Settings() {
               >
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
-                    <Dialog.Title className="modal-title">Change Password</Dialog.Title>
+                    <Dialog.Title className="modal-title">Cambiar Contraseña</Dialog.Title>
                     <button onClick={() => setShowPasswordModal(false)} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
@@ -667,11 +667,11 @@ function Settings() {
                   <form onSubmit={handlePasswordSubmit(onPasswordSubmit)}>
                     <div className="modal-body space-y-5">
                       <div className="form-group">
-                        <label className="label">Current Password</label>
+                        <label className="label">Contraseña Actual</label>
                         <input
                           type="password"
                           className={`input ${passwordErrors.currentPassword ? 'input-error' : ''}`}
-                          {...registerPassword('currentPassword', { required: 'Current password is required' })}
+                          {...registerPassword('currentPassword', { required: 'La contraseña actual es requerida' })}
                         />
                         {passwordErrors.currentPassword && (
                           <p className="error-text">{passwordErrors.currentPassword.message}</p>
@@ -679,13 +679,13 @@ function Settings() {
                       </div>
 
                       <div className="form-group">
-                        <label className="label">New Password</label>
+                        <label className="label">Nueva Contraseña</label>
                         <input
                           type="password"
                           className={`input ${passwordErrors.newPassword ? 'input-error' : ''}`}
                           {...registerPassword('newPassword', {
-                            required: 'New password is required',
-                            minLength: { value: 8, message: 'Password must be at least 8 characters' },
+                            required: 'La nueva contraseña es requerida',
+                            minLength: { value: 8, message: 'La contraseña debe tener al menos 8 caracteres' },
                           })}
                         />
                         {passwordErrors.newPassword && (
@@ -694,13 +694,13 @@ function Settings() {
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Confirm New Password</label>
+                        <label className="label">Confirmar Nueva Contraseña</label>
                         <input
                           type="password"
                           className={`input ${passwordErrors.confirmPassword ? 'input-error' : ''}`}
                           {...registerPassword('confirmPassword', {
-                            required: 'Please confirm your password',
-                            validate: value => value === watch('newPassword') || 'Passwords do not match',
+                            required: 'Por favor confirma tu contraseña',
+                            validate: value => value === watch('newPassword') || 'Las contraseñas no coinciden',
                           })}
                         />
                         {passwordErrors.confirmPassword && (
@@ -711,16 +711,16 @@ function Settings() {
 
                     <div className="modal-footer">
                       <button type="button" onClick={() => setShowPasswordModal(false)} className="btn-secondary">
-                        Cancel
+                        Cancelar
                       </button>
                       <button type="submit" disabled={isPasswordSubmitting} className="btn-primary">
                         {isPasswordSubmitting ? (
                           <>
                             <span className="spinner" />
-                            Changing...
+                            Cambiando...
                           </>
                         ) : (
-                          'Change Password'
+                          'Cambiar Contraseña'
                         )}
                       </button>
                     </div>
@@ -764,10 +764,10 @@ function Settings() {
                       <TrashIcon className="h-8 w-8 text-red-600" />
                     </div>
                     <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">
-                      Delete Sound
+                      Eliminar Sonido
                     </Dialog.Title>
                     <p className="text-gray-600 mb-4">
-                      Are you sure you want to delete this custom sound?
+                      ¿Estás seguro de que deseas eliminar este sonido personalizado?
                     </p>
 
                     {soundToDelete && (
@@ -790,7 +790,7 @@ function Settings() {
                       className="btn-secondary"
                       disabled={isDeletingSound}
                     >
-                      Cancel
+                      Cancelar
                     </button>
                     <button
                       type="button"
@@ -801,10 +801,10 @@ function Settings() {
                       {isDeletingSound ? (
                         <>
                           <span className="spinner" />
-                          Deleting...
+                          Eliminando...
                         </>
                       ) : (
-                        'Delete'
+                        'Eliminar'
                       )}
                     </button>
                   </div>

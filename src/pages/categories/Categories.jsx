@@ -17,9 +17,9 @@ import {
 import { useCategoriesStore } from '../../store/useStore';
 
 const categoryTypes = [
-  { value: 'ingreso', label: 'Income', icon: ArrowTrendingUpIcon, color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-100', textColor: 'text-emerald-600' },
-  { value: 'gasto', label: 'Expense', icon: ArrowTrendingDownIcon, color: 'from-red-500 to-red-600', bgColor: 'bg-red-100', textColor: 'text-red-600' },
-  { value: 'ambos', label: 'Both', icon: ArrowsRightLeftIcon, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-100', textColor: 'text-purple-600' },
+  { value: 'ingreso', label: 'Ingreso', icon: ArrowTrendingUpIcon, color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-100', textColor: 'text-emerald-600' },
+  { value: 'gasto', label: 'Gasto', icon: ArrowTrendingDownIcon, color: 'from-red-500 to-red-600', bgColor: 'bg-red-100', textColor: 'text-red-600' },
+  { value: 'ambos', label: 'Ambos', icon: ArrowsRightLeftIcon, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-100', textColor: 'text-purple-600' },
 ];
 
 function Categories() {
@@ -59,24 +59,24 @@ function Categories() {
     try {
       if (editingCategory) {
         await updateCategory(accountId, editingCategory.id, data);
-        toast.success('Category updated');
+        toast.success('Categoría actualizada');
       } else {
         await createCategory(accountId, data);
-        toast.success('Category created');
+        toast.success('Categoría creada');
       }
       closeModal();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(error.response?.data?.error || 'Operación fallida');
     }
   };
 
   const handleDelete = async (categoryId) => {
     try {
       await deleteCategory(accountId, categoryId);
-      toast.success('Category deleted');
+      toast.success('Categoría eliminada');
       setDeleteConfirm(null);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Cannot delete category in use');
+      toast.error(error.response?.data?.error || 'No se puede eliminar categoría en uso');
     }
   };
 
@@ -84,7 +84,6 @@ function Categories() {
     return categoryTypes.find(t => t.value === tipo) || categoryTypes[1];
   };
 
-  const globalCategories = categories.filter(c => c.esGlobal);
   const accountCategories = categories.filter(c => !c.esGlobal);
 
   return (
@@ -97,14 +96,14 @@ function Categories() {
               <Squares2X2Icon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="page-title">Categories</h1>
-              <p className="page-subtitle">Organize your transactions</p>
+              <h1 className="page-title">Categorías</h1>
+              <p className="page-subtitle">Organiza tus transacciones</p>
             </div>
           </div>
         </div>
         <button onClick={openCreateModal} className="btn-primary">
           <PlusIcon className="h-5 w-5" />
-          New Category
+          Nueva Categoría
         </button>
       </div>
 
@@ -120,7 +119,7 @@ function Categories() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{count}</p>
-                <p className="text-sm text-gray-500">{type.label} Categories</p>
+                <p className="text-sm text-gray-500">Categorías de {type.label}</p>
               </div>
             </div>
           );
@@ -135,8 +134,8 @@ function Categories() {
               <FolderIcon className="h-5 w-5 text-indigo-600" />
             </div>
             <div>
-              <h2 className="card-title mb-0">Custom Categories</h2>
-              <p className="card-subtitle">{accountCategories.length} categories</p>
+              <h2 className="card-title mb-0">Categorías Personalizadas</h2>
+              <p className="card-subtitle">{accountCategories.length} categorías</p>
             </div>
           </div>
         </div>
@@ -167,14 +166,14 @@ function Categories() {
                     <button
                       onClick={() => openEditModal(cat)}
                       className="btn-icon-sm hover:bg-gray-100"
-                      title="Edit"
+                      title="Editar"
                     >
                       <PencilIcon className="h-4 w-4 text-gray-500" />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(cat)}
                       className="btn-icon-sm hover:bg-red-50"
-                      title="Delete"
+                      title="Eliminar"
                     >
                       <TrashIcon className="h-4 w-4 text-red-500" />
                     </button>
@@ -188,53 +187,15 @@ function Categories() {
             <div className="empty-state-icon">
               <FolderIcon className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="empty-state-title">No custom categories</h3>
-            <p className="empty-state-description">Create categories to organize your transactions</p>
+            <h3 className="empty-state-title">Sin categorías personalizadas</h3>
+            <p className="empty-state-description">Crea categorías para organizar tus transacciones</p>
             <button onClick={openCreateModal} className="btn-primary">
               <PlusIcon className="h-5 w-5" />
-              Create Category
+              Crear Categoría
             </button>
           </div>
         )}
       </div>
-
-      {/* Global Categories */}
-      {globalCategories.length > 0 && (
-        <div className="card">
-          <div className="card-header px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <FolderIcon className="h-5 w-5 text-gray-500" />
-              </div>
-              <div>
-                <h2 className="card-title mb-0">Default Categories</h2>
-                <p className="card-subtitle">System-provided categories</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="divide-y divide-gray-100">
-            {globalCategories.map(cat => {
-              const typeInfo = getCategoryType(cat.tipo);
-              const TypeIcon = typeInfo.icon;
-              return (
-                <div key={cat.id} className="px-6 py-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                      <TypeIcon className="h-6 w-6 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{cat.nombre}</p>
-                      <span className="text-xs text-gray-500">{typeInfo.label}</span>
-                    </div>
-                  </div>
-                  <span className="badge-gray">Default</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Create/Edit Modal */}
       <Transition appear show={showModal} as={Fragment}>
@@ -248,7 +209,7 @@ function Categories() {
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
                     <Dialog.Title className="modal-title">
-                      {editingCategory ? 'Edit Category' : 'New Category'}
+                      {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
                     </Dialog.Title>
                     <button onClick={closeModal} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
@@ -258,18 +219,18 @@ function Categories() {
                   <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="modal-body space-y-5">
                       <div className="form-group">
-                        <label className="label">Category Name</label>
+                        <label className="label">Nombre de la Categoría</label>
                         <input
                           type="text"
                           className={`input ${errors.nombre ? 'input-error' : ''}`}
-                          placeholder="e.g., Groceries"
-                          {...register('nombre', { required: 'Name is required' })}
+                          placeholder="ej., Supermercado"
+                          {...register('nombre', { required: 'El nombre es requerido' })}
                         />
                         {errors.nombre && <p className="error-text">{errors.nombre.message}</p>}
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Type</label>
+                        <label className="label">Tipo</label>
                         <div className="grid grid-cols-3 gap-3">
                           {categoryTypes.map(type => {
                             const TypeIcon = type.icon;
@@ -299,16 +260,16 @@ function Categories() {
 
                     <div className="modal-footer">
                       <button type="button" onClick={closeModal} className="btn-secondary">
-                        Cancel
+                        Cancelar
                       </button>
                       <button type="submit" disabled={isSubmitting} className="btn-primary">
                         {isSubmitting ? (
                           <>
                             <span className="spinner" />
-                            Saving...
+                            Guardando...
                           </>
                         ) : (
-                          'Save'
+                          'Guardar'
                         )}
                       </button>
                     </div>
@@ -335,15 +296,15 @@ function Categories() {
                       <TrashIcon className="h-8 w-8 text-red-600" />
                     </div>
                     <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">
-                      Delete Category
+                      Eliminar Categoría
                     </Dialog.Title>
                     <p className="text-gray-600">
-                      Delete <strong>"{deleteConfirm?.nombre}"</strong>? This cannot be undone.
+                      ¿Eliminar <strong>"{deleteConfirm?.nombre}"</strong>? Esta acción no se puede deshacer.
                     </p>
                   </div>
                   <div className="modal-footer justify-center">
-                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancel</button>
-                    <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-danger">Delete</button>
+                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancelar</button>
+                    <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-danger">Eliminar</button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

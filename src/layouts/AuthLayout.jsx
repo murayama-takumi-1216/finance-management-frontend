@@ -32,20 +32,20 @@ function AuthLayout() {
           </div>
 
           <h1 className="text-4xl font-bold text-white mb-6 leading-tight">
-            Take control of your<br />
-            <span className="text-indigo-200">financial future</span>
+            Toma el control de tu<br />
+            <span className="text-indigo-200">futuro financiero</span>
           </h1>
 
           <p className="text-lg text-indigo-100 mb-10 max-w-md">
-            Track expenses, manage accounts, and gain insights into your spending habits with our powerful financial management platform.
+            Rastrea gastos, administra cuentas y obtén información sobre tus hábitos de gasto con nuestra poderosa plataforma de gestión financiera.
           </p>
 
           {/* Features */}
           <div className="space-y-4">
             {[
-              { title: 'Smart Analytics', desc: 'Visualize your finances with beautiful charts' },
-              { title: 'Multiple Accounts', desc: 'Manage personal, business & shared accounts' },
-              { title: 'Secure & Private', desc: 'Your data is encrypted and protected' },
+              { title: 'Análisis Inteligente', desc: 'Visualiza tus finanzas con hermosos gráficos' },
+              { title: 'Múltiples Cuentas', desc: 'Administra cuentas personales, de negocios y compartidas' },
+              { title: 'Seguro y Privado', desc: 'Tus datos están encriptados y protegidos' },
             ].map((feature, index) => (
               <div key={index} className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -74,14 +74,14 @@ function AuthLayout() {
               </div>
               <span className="text-2xl font-bold text-gray-900">Finance Pro</span>
             </div>
-            <p className="text-gray-500">Manage your finances with ease</p>
+            <p className="text-gray-500">Administra tus finanzas con facilidad</p>
           </div>
 
           <Outlet />
 
           {/* Footer */}
           <p className="text-center text-xs text-gray-400 mt-8">
-            &copy; {new Date().getFullYear()} Finance Pro. All rights reserved.
+            &copy; {new Date().getFullYear()} Finance Pro. Todos los derechos reservados.
           </p>
         </div>
       </div>

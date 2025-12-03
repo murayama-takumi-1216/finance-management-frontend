@@ -24,24 +24,24 @@ function Register() {
     clearError();
     try {
       await registerUser(data.nombre, data.email, data.password);
-      toast.success('Account created successfully!');
+      toast.success('¡Cuenta creada exitosamente!');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Registration failed');
+      toast.error(err.response?.data?.error || 'Error en el registro');
     }
   };
 
   return (
     <div className="card p-8 shadow-xl border-0 animate-slideUp">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
-        <p className="text-gray-500 mt-2">Start managing your finances today</p>
+        <h2 className="text-2xl font-bold text-gray-900">Crea tu cuenta</h2>
+        <p className="text-gray-500 mt-2">Comienza a administrar tus finanzas hoy</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="form-group">
           <label htmlFor="nombre" className="label">
-            Full name
+            Nombre completo
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -52,12 +52,12 @@ function Register() {
               type="text"
               autoComplete="name"
               className={`input pl-11 ${errors.nombre ? 'input-error' : ''}`}
-              placeholder="John Doe"
+              placeholder="Juan Pérez"
               {...register('nombre', {
-                required: 'Name is required',
+                required: 'El nombre es requerido',
                 minLength: {
                   value: 2,
-                  message: 'Name must be at least 2 characters',
+                  message: 'El nombre debe tener al menos 2 caracteres',
                 },
               })}
             />
@@ -74,7 +74,7 @@ function Register() {
 
         <div className="form-group">
           <label htmlFor="email" className="label">
-            Email address
+            Correo electrónico
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -87,10 +87,10 @@ function Register() {
               className={`input pl-11 ${errors.email ? 'input-error' : ''}`}
               placeholder="you@example.com"
               {...register('email', {
-                required: 'Email is required',
+                required: 'El correo electrónico es requerido',
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Invalid email address',
+                  message: 'Correo electrónico inválido',
                 },
               })}
             />
@@ -107,7 +107,7 @@ function Register() {
 
         <div className="form-group">
           <label htmlFor="password" className="label">
-            Password
+            Contraseña
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -118,12 +118,12 @@ function Register() {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               className={`input pl-11 pr-11 ${errors.password ? 'input-error' : ''}`}
-              placeholder="Create a password"
+              placeholder="Crea una contraseña"
               {...register('password', {
-                required: 'Password is required',
+                required: 'La contraseña es requerida',
                 minLength: {
                   value: 6,
-                  message: 'Password must be at least 6 characters',
+                  message: 'La contraseña debe tener al menos 6 caracteres',
                 },
               })}
             />
@@ -151,7 +151,7 @@ function Register() {
 
         <div className="form-group">
           <label htmlFor="confirmPassword" className="label">
-            Confirm password
+            Confirmar contraseña
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -162,10 +162,10 @@ function Register() {
               type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               className={`input pl-11 pr-11 ${errors.confirmPassword ? 'input-error' : ''}`}
-              placeholder="Confirm your password"
+              placeholder="Confirma tu contraseña"
               {...register('confirmPassword', {
-                required: 'Please confirm your password',
-                validate: (value) => value === password || 'Passwords do not match',
+                required: 'Por favor confirma tu contraseña',
+                validate: (value) => value === password || 'Las contraseñas no coinciden',
               })}
             />
             <button
@@ -203,22 +203,22 @@ function Register() {
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="spinner" />
-              Creating account...
+              Creando cuenta...
             </span>
           ) : (
-            'Create account'
+            'Crear cuenta'
           )}
         </button>
       </form>
 
       <div className="divider-text mt-6">
-        <span>Already registered?</span>
+        <span>¿Ya estás registrado?</span>
       </div>
 
       <p className="text-center text-sm text-gray-600 mt-4">
-        Already have an account?{' '}
+        ¿Ya tienes una cuenta?{' '}
         <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
-          Sign in
+          Iniciar sesión
         </Link>
       </p>
     </div>

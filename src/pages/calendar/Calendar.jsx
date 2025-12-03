@@ -23,26 +23,26 @@ import { useEventsStore, useCategoriesStore, useNotificationsStore } from '../..
 import notificationSound, { NOTIFICATION_SOUNDS } from '../../utils/notificationSound';
 
 const eventTypeOptions = [
-  { value: 'pago_unico', label: 'One-time Payment', color: 'from-blue-500 to-blue-600' },
-  { value: 'pago_recurrente', label: 'Recurring Payment', color: 'from-purple-500 to-purple-600' },
-  { value: 'recordatorio_generico', label: 'Reminder', color: 'from-amber-500 to-amber-600' },
+  { value: 'pago_unico', label: 'Pago Único', color: 'from-blue-500 to-blue-600' },
+  { value: 'pago_recurrente', label: 'Pago Recurrente', color: 'from-purple-500 to-purple-600' },
+  { value: 'recordatorio_generico', label: 'Recordatorio', color: 'from-amber-500 to-amber-600' },
 ];
 
 const recurrenceOptions = [
-  { value: null, label: 'No repeat' },
-  { value: 'diaria', label: 'Daily' },
-  { value: 'semanal', label: 'Weekly' },
-  { value: 'mensual', label: 'Monthly' },
-  { value: 'anual', label: 'Yearly' },
+  { value: null, label: 'Sin repetición' },
+  { value: 'diaria', label: 'Diario' },
+  { value: 'semanal', label: 'Semanal' },
+  { value: 'mensual', label: 'Mensual' },
+  { value: 'anual', label: 'Anual' },
 ];
 
 const reminderOptions = [
-  { value: '0', label: 'At time of event' },
-  { value: '15', label: '15 minutes before' },
-  { value: '30', label: '30 minutes before' },
-  { value: '60', label: '1 hour before' },
-  { value: '1440', label: '1 day before' },
-  { value: '10080', label: '1 week before' },
+  { value: '0', label: 'Al momento del evento' },
+  { value: '15', label: '15 minutos antes' },
+  { value: '30', label: '30 minutos antes' },
+  { value: '60', label: '1 hora antes' },
+  { value: '1440', label: '1 día antes' },
+  { value: '10080', label: '1 semana antes' },
 ];
 
 function Calendar() {
@@ -181,14 +181,14 @@ function Calendar() {
 
       if (editingEvent) {
         await updateEvent(accountId, editingEvent.id, payload);
-        toast.success('Event updated');
+        toast.success('Evento actualizado');
       } else {
         await createEvent(accountId, payload);
-        toast.success('Event created');
+        toast.success('Evento creado');
       }
       setShowEventModal(false);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(error.response?.data?.error || 'Operación fallida');
     }
   };
 
@@ -213,7 +213,7 @@ function Calendar() {
       };
 
       await createReminder(accountId, payload);
-      toast.success('Reminder created');
+      toast.success('Recordatorio creado');
       setShowReminderModal(false);
 
       const year = currentDate.getFullYear();
@@ -223,26 +223,26 @@ function Calendar() {
       fetchEvents(accountId, { start, end });
       fetchReminders(accountId);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      toast.error(error.response?.data?.error || 'Operación fallida');
     }
   };
 
   const handleDeleteEvent = async (eventId) => {
     try {
       await deleteEvent(accountId, eventId);
-      toast.success('Event deleted');
+      toast.success('Evento eliminado');
       setDeleteConfirm(null);
     } catch (error) {
-      toast.error('Failed to delete event');
+      toast.error('Error al eliminar evento');
     }
   };
 
   const handleDeleteReminder = async (reminderId) => {
     try {
       await deleteReminder(accountId, reminderId);
-      toast.success('Reminder deleted');
+      toast.success('Recordatorio eliminado');
     } catch (error) {
-      toast.error('Failed to delete reminder');
+      toast.error('Error al eliminar recordatorio');
     }
   };
 
@@ -252,7 +252,7 @@ function Calendar() {
   };
 
   const days = getDaysInMonth();
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   const upcomingEvents = (events ?? [])
     .filter(Boolean)
@@ -279,8 +279,8 @@ function Calendar() {
               <CalendarDaysIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="page-title">Calendar</h1>
-              <p className="page-subtitle">Track payments and events</p>
+              <h1 className="page-title">Calendario</h1>
+              <p className="page-subtitle">Seguimiento de pagos y eventos</p>
             </div>
           </div>
         </div>
@@ -288,12 +288,12 @@ function Calendar() {
           {accountId && (
             <button onClick={openReminderModal} className="btn-secondary">
               <BellIcon className="h-5 w-5" />
-              Add Reminder
+              Agregar Recordatorio
             </button>
           )}
           <button onClick={() => openEventModal()} className="btn-primary">
             <PlusIcon className="h-5 w-5" />
-            New Event
+            Nuevo Evento
           </button>
         </div>
       </div>
@@ -305,10 +305,10 @@ function Calendar() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-bold text-gray-900">
-                {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
               </h2>
               <button onClick={goToToday} className="btn-ghost text-sm text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
-                Today
+                Hoy
               </button>
             </div>
             <div className="flex items-center gap-1">
@@ -362,7 +362,7 @@ function Calendar() {
                       </div>
                     ))}
                     {dayEvents.length > 2 && (
-                      <div className="text-xs text-gray-500 pl-1 font-medium">+{dayEvents.length - 2} more</div>
+                      <div className="text-xs text-gray-500 pl-1 font-medium">+{dayEvents.length - 2} más</div>
                     )}
                   </div>
                 </div>
@@ -378,7 +378,7 @@ function Calendar() {
             <div className="card-header px-4 py-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <CalendarDaysIcon className="h-5 w-5 text-indigo-600" />
-                <h3 className="font-semibold text-gray-900">Upcoming</h3>
+                <h3 className="font-semibold text-gray-900">Próximos</h3>
               </div>
             </div>
             <div className="p-3 space-y-2">
@@ -416,7 +416,7 @@ function Calendar() {
                 </div>
               ))}
               {upcomingEvents.length === 0 && (
-                <div className="text-center py-6 text-gray-500 text-sm">No upcoming events</div>
+                <div className="text-center py-6 text-gray-500 text-sm">No hay eventos próximos</div>
               )}
             </div>
           </div>
@@ -427,7 +427,7 @@ function Calendar() {
               <div className="card-header px-4 py-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <BellIcon className="h-5 w-5 text-amber-600" />
-                  <h3 className="font-semibold text-gray-900">Reminders</h3>
+                  <h3 className="font-semibold text-gray-900">Recordatorios</h3>
                 </div>
               </div>
               <div className="p-3 space-y-2">
@@ -451,7 +451,7 @@ function Calendar() {
                   </div>
                 ))}
                 {activeReminders.length === 0 && (
-                  <div className="text-center py-6 text-gray-500 text-sm">No active reminders</div>
+                  <div className="text-center py-6 text-gray-500 text-sm">No hay recordatorios activos</div>
                 )}
               </div>
             </div>
@@ -470,7 +470,7 @@ function Calendar() {
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
-                    <Dialog.Title className="modal-title">{editingEvent ? 'Edit Event' : 'New Event'}</Dialog.Title>
+                    <Dialog.Title className="modal-title">{editingEvent ? 'Editar Evento' : 'Nuevo Evento'}</Dialog.Title>
                     <button onClick={() => setShowEventModal(false)} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
@@ -479,31 +479,31 @@ function Calendar() {
                   <form onSubmit={handleSubmit(onSubmitEvent)}>
                     <div className="modal-body space-y-4">
                       <div className="form-group">
-                        <label className="label">Title</label>
-                        <input type="text" className={`input ${errors.titulo ? 'input-error' : ''}`} placeholder="Event title" {...register('titulo', { required: 'Title is required' })} />
+                        <label className="label">Título</label>
+                        <input type="text" className={`input ${errors.titulo ? 'input-error' : ''}`} placeholder="Título del evento" {...register('titulo', { required: 'El título es requerido' })} />
                         {errors.titulo && <p className="error-text">{errors.titulo.message}</p>}
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Date & Time</label>
+                        <label className="label">Fecha y Hora</label>
                         <DatePicker selected={eventDate} onChange={setEventDate} showTimeSelect dateFormat="Pp" className="input w-full" />
                       </div>
 
                       <div className="form-row">
                         <div className="form-group">
-                          <label className="label">Type</label>
+                          <label className="label">Tipo</label>
                           <select className="select" {...register('tipo', { required: true })}>
                             {eventTypeOptions.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                           </select>
                         </div>
                         <div className="form-group">
-                          <label className="label">Amount</label>
+                          <label className="label">Monto</label>
                           <input type="number" step="0.01" className="input" placeholder="0.00" {...register('monto')} />
                         </div>
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Recurrence</label>
+                        <label className="label">Recurrencia</label>
                         <select className="select" {...register('recurrencia')}>
                           {recurrenceOptions.map(r => <option key={r.value || 'none'} value={r.value || ''}>{r.label}</option>)}
                         </select>
@@ -511,24 +511,24 @@ function Calendar() {
 
                       {accountId && categories.length > 0 && (
                         <div className="form-group">
-                          <label className="label">Category</label>
+                          <label className="label">Categoría</label>
                           <select className="select" {...register('categoria_id')}>
-                            <option value="">No category</option>
+                            <option value="">Sin categoría</option>
                             {categories.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                           </select>
                         </div>
                       )}
 
                       <div className="form-group">
-                        <label className="label">Description</label>
-                        <textarea className="textarea" rows={2} placeholder="Optional description" {...register('descripcion')} />
+                        <label className="label">Descripción</label>
+                        <textarea className="textarea" rows={2} placeholder="Descripción opcional" {...register('descripcion')} />
                       </div>
                     </div>
 
                     <div className="modal-footer">
-                      <button type="button" onClick={() => setShowEventModal(false)} className="btn-secondary">Cancel</button>
+                      <button type="button" onClick={() => setShowEventModal(false)} className="btn-secondary">Cancelar</button>
                       <button type="submit" disabled={isSubmitting} className="btn-primary">
-                        {isSubmitting ? <><span className="spinner" />Saving...</> : 'Save'}
+                        {isSubmitting ? <><span className="spinner" />Guardando...</> : 'Guardar'}
                       </button>
                     </div>
                   </form>
@@ -551,7 +551,7 @@ function Calendar() {
                 <Dialog.Panel className="modal-panel max-w-2xl">
                   <div className="modal-header">
                     <Dialog.Title className="modal-title">
-                      {selectedDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                      {selectedDate?.toLocaleDateString('es-ES', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                     </Dialog.Title>
                     <button onClick={() => setShowViewEventsModal(false)} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
@@ -591,16 +591,16 @@ function Calendar() {
                     ) : (
                       <div className="empty-state py-8">
                         <CalendarDaysIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-500">No events for this day</p>
+                        <p className="text-gray-500">No hay eventos para este día</p>
                       </div>
                     )}
                   </div>
 
                   <div className="modal-footer">
-                    <button onClick={() => setShowViewEventsModal(false)} className="btn-secondary">Close</button>
+                    <button onClick={() => setShowViewEventsModal(false)} className="btn-secondary">Cerrar</button>
                     <button onClick={openAddEventFromView} className="btn-primary">
                       <PlusIcon className="h-5 w-5" />
-                      Add Event
+                      Agregar Evento
                     </button>
                   </div>
                 </Dialog.Panel>
@@ -621,7 +621,7 @@ function Calendar() {
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
                 <Dialog.Panel className="modal-panel">
                   <div className="modal-header">
-                    <Dialog.Title className="modal-title">New Reminder</Dialog.Title>
+                    <Dialog.Title className="modal-title">Nuevo Recordatorio</Dialog.Title>
                     <button onClick={() => setShowReminderModal(false)} className="btn-icon-sm hover:bg-gray-100">
                       <XMarkIcon className="h-5 w-5 text-gray-400" />
                     </button>
@@ -630,18 +630,18 @@ function Calendar() {
                   <form onSubmit={handleReminderSubmit(onSubmitReminder)}>
                     <div className="modal-body space-y-4">
                       <div className="form-group">
-                        <label className="label">Message</label>
-                        <input type="text" className={`input ${reminderErrors.mensaje ? 'input-error' : ''}`} placeholder="Reminder message" {...registerReminder('mensaje', { required: 'Message is required' })} />
+                        <label className="label">Mensaje</label>
+                        <input type="text" className={`input ${reminderErrors.mensaje ? 'input-error' : ''}`} placeholder="Mensaje del recordatorio" {...registerReminder('mensaje', { required: 'El mensaje es requerido' })} />
                         {reminderErrors.mensaje && <p className="error-text">{reminderErrors.mensaje.message}</p>}
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Date & Time</label>
+                        <label className="label">Fecha y Hora</label>
                         <DatePicker selected={reminderDate} onChange={setReminderDate} showTimeSelect dateFormat="Pp" className="input w-full" />
                       </div>
 
                       <div className="form-group">
-                        <label className="label">Remind me</label>
+                        <label className="label">Recordarme</label>
                         <select className="select" {...registerReminder('minutos_antes')}>
                           {reminderOptions.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                         </select>
@@ -650,7 +650,7 @@ function Calendar() {
                       <div className="form-group">
                         <label className="label flex items-center gap-2">
                           <SpeakerWaveIcon className="h-4 w-4" />
-                          Notification Sound
+                          Sonido de Notificación
                         </label>
                         <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
                           {NOTIFICATION_SOUNDS.map((sound) => (
@@ -692,9 +692,9 @@ function Calendar() {
                     </div>
 
                     <div className="modal-footer">
-                      <button type="button" onClick={() => setShowReminderModal(false)} className="btn-secondary">Cancel</button>
+                      <button type="button" onClick={() => setShowReminderModal(false)} className="btn-secondary">Cancelar</button>
                       <button type="submit" disabled={isReminderSubmitting} className="btn-primary">
-                        {isReminderSubmitting ? <><span className="spinner" />Saving...</> : 'Save'}
+                        {isReminderSubmitting ? <><span className="spinner" />Guardando...</> : 'Guardar'}
                       </button>
                     </div>
                   </form>
@@ -719,12 +719,12 @@ function Calendar() {
                     <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
                       <TrashIcon className="h-8 w-8 text-red-600" />
                     </div>
-                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">Delete Event</Dialog.Title>
-                    <p className="text-gray-600">Delete "{deleteConfirm?.titulo}"? This action cannot be undone.</p>
+                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-2">Eliminar Evento</Dialog.Title>
+                    <p className="text-gray-600">¿Eliminar "{deleteConfirm?.titulo}"? Esta acción no se puede deshacer.</p>
                   </div>
                   <div className="modal-footer justify-center">
-                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancel</button>
-                    <button onClick={() => handleDeleteEvent(deleteConfirm.id)} className="btn-danger">Delete</button>
+                    <button onClick={() => setDeleteConfirm(null)} className="btn-secondary">Cancelar</button>
+                    <button onClick={() => handleDeleteEvent(deleteConfirm.id)} className="btn-danger">Eliminar</button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

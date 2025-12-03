@@ -229,24 +229,24 @@ function Dashboard() {
 
   const formatCurrency = (amount, currency = 'USD') => {
     if (amount === null || amount === undefined) return '$0.00';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency }).format(amount);
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
   };
 
   const formatDateTime = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return new Date(dateStr).toLocaleDateString('es-ES', {
       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return 'Buenos días';
+    if (hour < 18) return 'Buenas tardes';
+    return 'Buenas noches';
   };
 
   // Calculate task stats
@@ -280,12 +280,12 @@ function Dashboard() {
           <div>
             <p className="text-indigo-200 text-sm font-medium">{getGreeting()}</p>
             <h1 className="text-3xl font-bold text-white mt-1">
-              {user?.nombre?.split(' ')[0] || 'Welcome'}!
+              {user?.nombre?.split(' ')[0] || 'Bienvenido'}!
             </h1>
             <p className="text-indigo-200 mt-2 max-w-md">
               {accounts.length > 0
-                ? `You have ${accounts.length} account${accounts.length > 1 ? 's' : ''} to manage. Here's your financial overview.`
-                : 'Start by creating your first account to track your finances.'}
+                ? `Tienes ${accounts.length} cuenta${accounts.length > 1 ? 's' : ''} para administrar. Aquí está tu resumen financiero.`
+                : 'Comienza creando tu primera cuenta para rastrear tus finanzas.'}
             </p>
           </div>
           <div className="flex gap-3">
@@ -294,7 +294,7 @@ function Dashboard() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition-colors backdrop-blur-sm border border-white/10"
             >
               <Squares2X2Icon className="h-5 w-5" />
-              All Accounts
+              Todas las Cuentas
             </Link>
             <Link
               to="/accounts"
@@ -302,7 +302,7 @@ function Dashboard() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-indigo-600 hover:bg-indigo-50 font-medium text-sm transition-colors shadow-lg shadow-indigo-900/20"
             >
               <PlusIcon className="h-5 w-5" />
-              New Account
+              Nueva Cuenta
             </Link>
           </div>
         </div>
@@ -325,9 +325,9 @@ function Dashboard() {
           <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
             <SparklesIcon className="h-12 w-12 text-indigo-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Welcome to Finance Manager!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">¡Bienvenido a Finance Manager!</h2>
           <p className="text-gray-500 max-w-md mx-auto mb-8">
-            Get started by creating your first account. Track your income, expenses, and achieve your financial goals.
+            Comienza creando tu primera cuenta. Rastrea tus ingresos, gastos y alcanza tus metas financieras.
           </p>
           <Link
             to="/accounts"
@@ -335,14 +335,14 @@ function Dashboard() {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 font-medium transition-colors shadow-lg shadow-indigo-200"
           >
             <PlusIcon className="h-5 w-5" />
-            Create Your First Account
+            Crear Tu Primera Cuenta
           </Link>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 pt-10 border-t border-gray-100">
             {[
-              { icon: ArrowTrendingUpIcon, color: 'emerald', title: 'Track Income', desc: 'Monitor all your income sources' },
-              { icon: ArrowTrendingDownIcon, color: 'rose', title: 'Manage Expenses', desc: 'Categorize and control spending' },
-              { icon: ChartBarIcon, color: 'indigo', title: 'View Reports', desc: 'Get insights into your finances' },
+              { icon: ArrowTrendingUpIcon, color: 'emerald', title: 'Rastrea Ingresos', desc: 'Monitorea todas tus fuentes de ingreso' },
+              { icon: ArrowTrendingDownIcon, color: 'rose', title: 'Administra Gastos', desc: 'Categoriza y controla tus gastos' },
+              { icon: ChartBarIcon, color: 'indigo', title: 'Ver Reportes', desc: 'Obtén información sobre tus finanzas' },
             ].map((item, i) => (
               <div key={i} className="text-center group">
                 <div className={`w-14 h-14 bg-${item.color}-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
@@ -360,11 +360,11 @@ function Dashboard() {
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="font-semibold text-gray-900">Your Accounts</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Select an account to view details</p>
+                <h3 className="font-semibold text-gray-900">Tus Cuentas</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Selecciona una cuenta para ver detalles</p>
               </div>
               <Link to="/accounts" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                Manage <ArrowRightIcon className="h-3.5 w-3.5" />
+                Administrar <ArrowRightIcon className="h-3.5 w-3.5" />
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -381,7 +381,7 @@ function Dashboard() {
                   to="/accounts"
                   className="p-4 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center hover:border-gray-300 hover:bg-gray-50 transition-colors"
                 >
-                  <span className="text-sm text-gray-500 font-medium">+{accounts.length - 4} more accounts</span>
+                  <span className="text-sm text-gray-500 font-medium">+{accounts.length - 4} cuentas más</span>
                 </Link>
               )}
             </div>
@@ -402,14 +402,14 @@ function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
                 icon={BanknotesIcon}
-                label="Total Balance"
+                label="Saldo Total"
                 value={formatCurrency(dashboardData.saldoTotal)}
                 gradient="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
                 iconBg="bg-indigo-400"
               />
               <StatCard
                 icon={ArrowTrendingUpIcon}
-                label="Income This Month"
+                label="Ingresos del Mes"
                 value={formatCurrency(dashboardData.mesActual?.ingresos)}
                 change={dashboardData.comparacionMesAnterior?.ingresos !== 0 ? Math.round(dashboardData.comparacionMesAnterior?.ingresos) : null}
                 changeType={dashboardData.comparacionMesAnterior?.ingresos >= 0 ? 'positive' : 'negative'}
@@ -418,7 +418,7 @@ function Dashboard() {
               />
               <StatCard
                 icon={ArrowTrendingDownIcon}
-                label="Expenses This Month"
+                label="Gastos del Mes"
                 value={formatCurrency(dashboardData.mesActual?.gastos)}
                 change={dashboardData.comparacionMesAnterior?.gastos !== 0 ? Math.round(dashboardData.comparacionMesAnterior?.gastos) : null}
                 changeType={dashboardData.comparacionMesAnterior?.gastos <= 0 ? 'positive' : 'negative'}
@@ -427,7 +427,7 @@ function Dashboard() {
               />
               <StatCard
                 icon={ScaleIcon}
-                label="Monthly Balance"
+                label="Balance Mensual"
                 value={formatCurrency(dashboardData.mesActual?.balance)}
                 gradient="bg-gradient-to-br from-violet-500 to-violet-600 text-white"
                 iconBg="bg-violet-400"
@@ -435,19 +435,19 @@ function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard icon={BanknotesIcon} label="Total Balance" value="$0.00" gradient="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white" iconBg="bg-indigo-400" />
-              <StatCard icon={ArrowTrendingUpIcon} label="Income This Month" value="$0.00" gradient="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white" iconBg="bg-emerald-400" />
-              <StatCard icon={ArrowTrendingDownIcon} label="Expenses This Month" value="$0.00" gradient="bg-gradient-to-br from-rose-500 to-rose-600 text-white" iconBg="bg-rose-400" />
-              <StatCard icon={ScaleIcon} label="Monthly Balance" value="$0.00" gradient="bg-gradient-to-br from-violet-500 to-violet-600 text-white" iconBg="bg-violet-400" />
+              <StatCard icon={BanknotesIcon} label="Saldo Total" value="$0.00" gradient="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white" iconBg="bg-indigo-400" />
+              <StatCard icon={ArrowTrendingUpIcon} label="Ingresos del Mes" value="$0.00" gradient="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white" iconBg="bg-emerald-400" />
+              <StatCard icon={ArrowTrendingDownIcon} label="Gastos del Mes" value="$0.00" gradient="bg-gradient-to-br from-rose-500 to-rose-600 text-white" iconBg="bg-rose-400" />
+              <StatCard icon={ScaleIcon} label="Balance Mensual" value="$0.00" gradient="bg-gradient-to-br from-violet-500 to-violet-600 text-white" iconBg="bg-violet-400" />
             </div>
           )}
 
           {/* Charts Row 1 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ChartCard
-              title="Monthly Trends"
-              subtitle="Income, expenses & balance over time"
-              action="View Reports"
+              title="Tendencias Mensuales"
+              subtitle="Ingresos, gastos y balance en el tiempo"
+              action="Ver Reportes"
               actionLink={selectedAccountId ? `/accounts/${selectedAccountId}/reports` : '/accounts'}
               loading={isLoadingCharts}
             >
@@ -455,9 +455,9 @@ function Dashboard() {
             </ChartCard>
 
             <ChartCard
-              title="Income vs Expenses"
-              subtitle="Last 6 months comparison"
-              action="Details"
+              title="Ingresos vs Gastos"
+              subtitle="Comparación últimos 6 meses"
+              action="Detalles"
               actionLink={selectedAccountId ? `/accounts/${selectedAccountId}/reports` : '/accounts'}
               loading={isLoadingCharts}
             >
@@ -468,9 +468,9 @@ function Dashboard() {
           {/* Charts Row 2 */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <ChartCard
-              title="Expenses Breakdown"
-              subtitle="By category"
-              action="Categories"
+              title="Desglose de Gastos"
+              subtitle="Por categoría"
+              action="Categorías"
               actionLink={selectedAccountId ? `/accounts/${selectedAccountId}/categories` : '/accounts'}
               loading={isLoadingCharts}
             >
@@ -478,17 +478,17 @@ function Dashboard() {
             </ChartCard>
 
             <ChartCard
-              title="Income Sources"
-              subtitle="By category"
+              title="Fuentes de Ingresos"
+              subtitle="Por categoría"
               loading={isLoadingCharts}
             >
               <IncomeByCategoryChart data={incomeByCategoryData} height={280} />
             </ChartCard>
 
             <ChartCard
-              title="Tasks Overview"
-              subtitle="Current status"
-              action="View All"
+              title="Resumen de Tareas"
+              subtitle="Estado actual"
+              action="Ver Todo"
               actionLink="/tasks"
             >
               {(taskSummaryData.pendientes > 0 || taskSummaryData.enProgreso > 0 || taskSummaryData.completadas > 0) ? (
@@ -501,22 +501,22 @@ function Dashboard() {
                       <p className="text-2xl font-bold text-gray-900">
                         {taskSummaryData.pendientes + taskSummaryData.enProgreso}
                       </p>
-                      <p className="text-xs text-gray-500 font-medium">Active Tasks</p>
+                      <p className="text-xs text-gray-500 font-medium">Tareas Activas</p>
                     </div>
                     <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl">
                       <p className="text-2xl font-bold text-emerald-600">
                         {taskSummaryData.completadas}
                       </p>
-                      <p className="text-xs text-gray-500 font-medium">Completed</p>
+                      <p className="text-xs text-gray-500 font-medium">Completadas</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <EmptyState
                   icon={ClipboardDocumentListIcon}
-                  title="No tasks yet"
-                  description="Create tasks to track your financial to-dos"
-                  action="Create Task"
+                  title="Sin tareas aún"
+                  description="Crea tareas para rastrear tus pendientes financieros"
+                  action="Crear Tarea"
                   actionLink="/tasks"
                 />
               )}
@@ -526,9 +526,9 @@ function Dashboard() {
           {/* Charts Row 3 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ChartCard
-              title="Top Expense Categories"
-              subtitle="Where your money goes"
-              action="Manage"
+              title="Categorías de Gasto Principales"
+              subtitle="A dónde va tu dinero"
+              action="Administrar"
               actionLink={selectedAccountId ? `/accounts/${selectedAccountId}/categories` : '/accounts'}
               loading={isLoadingCharts}
             >
@@ -536,8 +536,8 @@ function Dashboard() {
             </ChartCard>
 
             <ChartCard
-              title="Top Providers"
-              subtitle="Most frequent vendors"
+              title="Proveedores Principales"
+              subtitle="Vendedores más frecuentes"
               loading={isLoadingCharts}
             >
               <SpendingByProviderChart data={providerData} height={260} />
@@ -646,26 +646,81 @@ function Dashboard() {
 
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-1">Quick Actions</h3>
-            <p className="text-xs text-gray-500 mb-5">Common tasks you can perform</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {[
-                { to: selectedAccountId ? `/accounts/${selectedAccountId}/movements` : '/accounts', icon: ArrowTrendingUpIcon, label: 'Add Income', color: 'emerald' },
-                { to: selectedAccountId ? `/accounts/${selectedAccountId}/movements` : '/accounts', icon: ArrowTrendingDownIcon, label: 'Add Expense', color: 'rose' },
-                { to: '/tasks', icon: ClipboardDocumentListIcon, label: 'New Task', color: 'amber' },
-                { to: '/calendar', icon: CalendarIcon, label: 'Schedule', color: 'indigo' },
-                { to: selectedAccountId ? `/accounts/${selectedAccountId}/categories` : '/accounts', icon: FolderIcon, label: 'Categories', color: 'violet' },
-                { to: selectedAccountId ? `/accounts/${selectedAccountId}/reports` : '/accounts', icon: ChartPieIcon, label: 'Reports', color: 'cyan' },
-              ].map((item, i) => (
-                <Link
-                  key={i}
-                  to={item.to}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl bg-${item.color}-50 hover:bg-${item.color}-100 transition-all hover:scale-105 group`}
-                >
-                  <item.icon className={`h-6 w-6 text-${item.color}-600 group-hover:scale-110 transition-transform`} />
-                  <span className={`text-sm font-medium text-${item.color}-700`}>{item.label}</span>
-                </Link>
-              ))}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+                <SparklesIcon className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Quick Actions</h3>
+                <p className="text-xs text-gray-500">Common tasks you can perform</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <Link
+                to={selectedAccountId ? `/accounts/${selectedAccountId}/movements` : '/accounts'}
+                className="group relative overflow-hidden flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:scale-110 transition-transform duration-300">
+                  <ArrowTrendingUpIcon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-emerald-700">Add Income</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              <Link
+                to={selectedAccountId ? `/accounts/${selectedAccountId}/movements` : '/accounts'}
+                className="group relative overflow-hidden flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-100 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-200 group-hover:scale-110 transition-transform duration-300">
+                  <ArrowTrendingDownIcon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-rose-700">Add Expense</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-rose-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              <Link
+                to="/tasks"
+                className="group relative overflow-hidden flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-100 hover:border-amber-200 hover:shadow-lg hover:shadow-amber-100 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-200 group-hover:scale-110 transition-transform duration-300">
+                  <ClipboardDocumentListIcon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-amber-700">New Task</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-amber-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              <Link
+                to="/calendar"
+                className="group relative overflow-hidden flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:scale-110 transition-transform duration-300">
+                  <CalendarIcon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-indigo-700">Schedule</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-indigo-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              <Link
+                to={selectedAccountId ? `/accounts/${selectedAccountId}/categories` : '/accounts'}
+                className="group relative overflow-hidden flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-violet-50 to-violet-100 border-2 border-violet-100 hover:border-violet-200 hover:shadow-lg hover:shadow-violet-100 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg shadow-violet-200 group-hover:scale-110 transition-transform duration-300">
+                  <FolderIcon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-violet-700">Categories</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-violet-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              <Link
+                to={selectedAccountId ? `/accounts/${selectedAccountId}/reports` : '/accounts'}
+                className="group relative overflow-hidden flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br from-cyan-50 to-cyan-100 border-2 border-cyan-100 hover:border-cyan-200 hover:shadow-lg hover:shadow-cyan-100 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-200 group-hover:scale-110 transition-transform duration-300">
+                  <ChartPieIcon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-semibold text-cyan-700">Reports</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-cyan-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
             </div>
           </div>
         </>
